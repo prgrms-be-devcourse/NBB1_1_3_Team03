@@ -21,13 +21,13 @@ public class SmsController {
     private final SmsServiceImpl smsServiceImpl;
 
     @PostMapping("/send")
-    public ApiResponse<?> SendSMS(@RequestBody @Valid SmsRequestDto smsRequestDto){
+    public ApiResponse<Void> SendSMS(@RequestBody @Valid SmsRequestDto smsRequestDto){
         smsServiceImpl.SendSms(smsRequestDto);
         return new ApiResponse<>(200,"문자를 전송했습니다",null);
     }
 
     @PostMapping("/verify")
-    public ApiResponse<?> verifyCode(@RequestBody @Valid SmsVerifyRequestDto req) {
+    public ApiResponse<Void> verifyCode(@RequestBody @Valid SmsVerifyRequestDto req) {
         boolean verify = smsServiceImpl.verifyCode(req);
         if (verify) {
             return new ApiResponse<>(200,"인증이 완료되었습니다.",null);
