@@ -1,8 +1,8 @@
-package com.sscanner.team.jwt;
+package com.sscanner.team.auth.jwt;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sscanner.team.user.repository.RedisRefreshTokenRepository;
+import com.sscanner.team.auth.repository.RedisRefreshTokenRepository;
 import com.sscanner.team.user.requestdto.UserLoginRequestDto;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletInputStream;

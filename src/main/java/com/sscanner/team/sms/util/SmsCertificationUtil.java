@@ -1,4 +1,4 @@
-package com.sscanner.team.user;
+package com.sscanner.team.sms.util;
 
 import jakarta.annotation.PostConstruct;
 import net.nurigo.sdk.NurigoApp;

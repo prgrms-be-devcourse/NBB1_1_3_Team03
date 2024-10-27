@@ -1,12 +1,12 @@
-package com.sscanner.team.user.service;
+package com.sscanner.team.sms.service;
 
 import com.sscanner.team.global.exception.BadRequestException;
 import com.sscanner.team.global.exception.ExceptionCode;
-import com.sscanner.team.user.SmsCertificationUtil;
-import com.sscanner.team.user.repository.SmsRepository;
+import com.sscanner.team.sms.util.SmsCertificationUtil;
+import com.sscanner.team.sms.repository.SmsRepository;
 import com.sscanner.team.user.repository.UserRepository;
-import com.sscanner.team.user.requestdto.SmsRequestDto;
-import com.sscanner.team.user.requestdto.SmsVerifyRequestDto;
+import com.sscanner.team.sms.requestdto.SmsRequestDto;
+import com.sscanner.team.sms.requestdto.SmsVerifyRequestDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.security.SecureRandom;

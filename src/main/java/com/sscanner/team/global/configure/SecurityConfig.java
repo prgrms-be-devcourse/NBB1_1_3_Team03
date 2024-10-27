@@ -1,10 +1,10 @@
 package com.sscanner.team.global.configure;
 
-import com.sscanner.team.jwt.CustomLogoutFilter;
-import com.sscanner.team.jwt.JWTFilter;
-import com.sscanner.team.jwt.JWTUtil;
-import com.sscanner.team.jwt.LoginFilter;
-import com.sscanner.team.user.repository.RedisRefreshTokenRepository;
+import com.sscanner.team.auth.jwt.CustomLogoutFilter;
+import com.sscanner.team.auth.jwt.JWTFilter;
+import com.sscanner.team.auth.jwt.JWTUtil;
+import com.sscanner.team.auth.jwt.LoginFilter;
+import com.sscanner.team.auth.repository.RedisRefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

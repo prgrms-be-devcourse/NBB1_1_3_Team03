@@ -1,11 +1,11 @@
-package com.sscanner.team.user.controller;
+package com.sscanner.team.sms.controller;
 
 import com.sscanner.team.global.common.response.ApiResponse;
 import com.sscanner.team.global.exception.BadRequestException;
 import com.sscanner.team.global.exception.ExceptionCode;
-import com.sscanner.team.user.requestdto.SmsRequestDto;
-import com.sscanner.team.user.requestdto.SmsVerifyRequestDto;
-import com.sscanner.team.user.service.SmsService;
+import com.sscanner.team.sms.requestdto.SmsRequestDto;
+import com.sscanner.team.sms.requestdto.SmsVerifyRequestDto;
+import com.sscanner.team.sms.service.SmsService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;

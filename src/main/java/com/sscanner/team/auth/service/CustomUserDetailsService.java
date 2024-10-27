@@ -1,4 +1,4 @@
-package com.sscanner.team.user.service;
+package com.sscanner.team.auth.service;
 
 import com.sscanner.team.user.entity.User;
 import com.sscanner.team.global.exception.BadRequestException;

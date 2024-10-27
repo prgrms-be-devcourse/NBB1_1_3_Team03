@@ -1,4 +1,4 @@
-package com.sscanner.team.user.requestdto;
+package com.sscanner.team.sms.requestdto;
 
 import jakarta.validation.constraints.NotNull;
 

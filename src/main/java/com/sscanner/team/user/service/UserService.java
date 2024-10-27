@@ -1,5 +1,7 @@
 package com.sscanner.team.user.service;
 
+import com.sscanner.team.sms.requestdto.SmsVerifyRequestDto;
+import com.sscanner.team.sms.service.SmsService;
 import com.sscanner.team.user.entity.User;
 import com.sscanner.team.global.common.response.ApiResponse;
 import com.sscanner.team.global.exception.BadRequestException;

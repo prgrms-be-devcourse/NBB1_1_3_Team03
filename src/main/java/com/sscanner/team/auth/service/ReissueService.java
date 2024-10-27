@@ -1,10 +1,10 @@
-package com.sscanner.team.user.service;
+package com.sscanner.team.auth.service;
 
 import com.sscanner.team.global.common.response.ApiResponse;
 import com.sscanner.team.global.exception.BadRequestException;
 import com.sscanner.team.global.exception.ExceptionCode;
-import com.sscanner.team.jwt.JWTUtil;
-import com.sscanner.team.user.repository.RedisRefreshTokenRepository;
+import com.sscanner.team.auth.jwt.JWTUtil;
+import com.sscanner.team.auth.repository.RedisRefreshTokenRepository;
 import com.sscanner.team.user.responsedto.RefreshResponseDto;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.Cookie;

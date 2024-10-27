@@ -1,4 +1,4 @@
-package com.sscanner.team.jwt;
+package com.sscanner.team.auth.jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;

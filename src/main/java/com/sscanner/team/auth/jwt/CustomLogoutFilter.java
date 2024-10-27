@@ -1,6 +1,6 @@
-package com.sscanner.team.jwt;
+package com.sscanner.team.auth.jwt;
 
-import com.sscanner.team.user.repository.RedisRefreshTokenRepository;
+import com.sscanner.team.auth.repository.RedisRefreshTokenRepository;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
