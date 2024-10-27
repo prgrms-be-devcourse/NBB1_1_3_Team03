@@ -71,7 +71,7 @@ public class UserController {
 
     //아이디 찾기
     @PostMapping("/find-id")
-    public ApiResponse<UserFindIdResponseDto> findId(@RequestBody UserFindIdRequestDto requestDto) {
+    public ApiResponse<UserFindIdResponseDto> findId(@Valid @RequestBody UserFindIdRequestDto requestDto) {
         UserFindIdResponseDto responseDto = userServiceImpl.findUserId(requestDto);
         return ApiResponse.ok(200, responseDto,"아이디 찾기 성공");
     }
