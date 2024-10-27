@@ -1,6 +1,6 @@
 package com.sscanner.team.jwt;
 
-import com.sscanner.team.user.repository.RefreshRepository;
+import com.sscanner.team.user.repository.RedisRefreshTokenRepository;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -18,7 +18,7 @@ import java.io.IOException;
 public class CustomLogoutFilter extends GenericFilterBean {
 
     private final JWTUtil jwtUtil;
-    private final RefreshRepository refreshRepository;
+    private final RedisRefreshTokenRepository refreshRepository;
 
     private static final String REFRESH_TOKEN = "refresh";
     private static final String LOGOUT_URI = "/logout";
@@ -53,7 +53,7 @@ public class CustomLogoutFilter extends GenericFilterBean {
         if (cookies == null) return null;
 
         for (Cookie cookie : cookies) {
-            if (cookie.getName().equals(REFRESH_TOKEN)) {
+            if (cookie.getName().equals(cookie.getName())) {
                 return cookie.getValue();
             }
         }
@@ -80,8 +80,11 @@ public class CustomLogoutFilter extends GenericFilterBean {
             return false;
         }
 
-        Boolean isExist = refreshRepository.existsByRefreshToken(refresh);
-        if (!isExist) {
+        // Redis에서 해당 이메일의 토큰이 존재하는지 확인
+        String email = jwtUtil.getEmail(refresh);
+        String storedToken = refreshRepository.findByEmail(email);
+
+        if (storedToken == null || !storedToken.equals(refresh)) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return false;
         }
@@ -90,13 +93,17 @@ public class CustomLogoutFilter extends GenericFilterBean {
     }
 
     private void logout(String refresh, HttpServletResponse response) {
-        // Refresh 토큰 DB에서 제거
-        refreshRepository.deleteByRefreshToken(refresh);
+
+        //레디스에서 리프레시 토큰 제거
+        String email = jwtUtil.getEmail(refresh);
+        refreshRepository.deleteByEmail(email);
 
         // Refresh 토큰 Cookie null ,값 0
         Cookie cookie = new Cookie(REFRESH_TOKEN, null);
         cookie.setMaxAge(0);
         cookie.setPath("/");
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true); //HTTPS 통신 시만 전송
 
         response.addCookie(cookie);
     }

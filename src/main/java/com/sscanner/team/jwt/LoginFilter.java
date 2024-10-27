@@ -2,8 +2,7 @@ package com.sscanner.team.jwt;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sscanner.team.user.entity.Refresh;
-import com.sscanner.team.user.repository.RefreshRepository;
+import com.sscanner.team.user.repository.RedisRefreshTokenRepository;
 import com.sscanner.team.user.requestdto.UserLoginRequestDto;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletInputStream;
@@ -24,7 +23,6 @@ import org.springframework.util.StreamUtils;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
-import java.util.Date;
 
 
 @RequiredArgsConstructor
@@ -32,7 +30,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
     private final JWTUtil jwtUtil;
-    private final RefreshRepository refreshRepository;
+    private final RedisRefreshTokenRepository refreshRepository;
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)throws AuthenticationException {
@@ -69,28 +67,13 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         String access = jwtUtil.createJwt("access", email, authority, 2000000L);
         String refresh = jwtUtil.createJwt("refresh", email, authority, 86400000L);
 
-        addRefreshEntity(email, refresh, 86400000L);
+        refreshRepository.save(email, refresh, 86400000L);
 
-        // SecurityContextHolder에 인증 정보 설정
-        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(email, null, authorities);
-        SecurityContextHolder.getContext().setAuthentication(authToken);
+        SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(email, null, authorities));
 
         response.setHeader("access", access);
         response.addCookie(createCookie("refresh", refresh));
         response.setStatus(HttpStatus.OK.value());
-    }
-
-    @Override
-    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) {
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-    }
-
-    // 리프레시 토큰 저장소에 저장
-    private void addRefreshEntity(String username, String refresh, Long expiredMs) {
-
-        Date date = new Date(System.currentTimeMillis() + expiredMs);
-        Refresh refreshEntity = new Refresh(username, refresh, date.toString());
-        refreshRepository.save(refreshEntity);
     }
 
     private Cookie createCookie(String key, String value) {
