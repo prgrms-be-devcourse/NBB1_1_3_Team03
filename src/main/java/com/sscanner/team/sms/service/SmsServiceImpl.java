@@ -13,7 +13,7 @@ import java.security.SecureRandom;
 
 @RequiredArgsConstructor
 @Service
-public class SmsService {
+public class SmsServiceImpl implements SmsService {
 
     private final SmsCertificationUtil smsCertificationUtil;
     private final SmsRepository smsRepository;
@@ -21,6 +21,7 @@ public class SmsService {
 
     private static final SecureRandom secureRandom = new SecureRandom();
 
+    @Override
     public void SendSms(SmsRequestDto smsRequestDto) {
         String phoneNum = smsRequestDto.phoneNum();
 
@@ -39,6 +40,7 @@ public class SmsService {
 
     }
 
+    @Override
     public boolean verifyCode(SmsVerifyRequestDto smsVerifyDto) {
         if (isVerify(smsVerifyDto.phoneNum(), smsVerifyDto.code())) {
             smsRepository.deleteSmsCertification(smsVerifyDto.phoneNum());
@@ -48,6 +50,7 @@ public class SmsService {
         }
     }
 
+    @Override
     public boolean isVerify(String phoneNum, String code) { // 전화번호에 대한 키 존재 + 인증코드 일치 검증
         return smsRepository.hasKey(phoneNum) &&
                 smsRepository.getSmsCertification(phoneNum).equals(code);

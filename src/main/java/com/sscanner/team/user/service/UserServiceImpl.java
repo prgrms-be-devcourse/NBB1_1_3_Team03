@@ -26,7 +26,7 @@ import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor
-public class UserService {
+public class UserServiceImpl implements UserService{
 
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
@@ -79,6 +79,7 @@ public class UserService {
     }
 
     // 회원가입
+    @Override
     public UserJoinResponseDto join(UserJoinRequestDto req){
 
         checkDuplicatedEmail(req.email());
@@ -95,6 +96,7 @@ public class UserService {
     }
 
     // 마이페이지 조회
+    @Override
     public ApiResponse<UserMypageResponseDto> getMypage() {
 
         User user = userUtils.getUser();
@@ -104,6 +106,7 @@ public class UserService {
 
 
     // 비밀번호 확인 (현재 비밀번호 확인)
+    @Override
     public boolean confirmPassword(String password){
         User user = userUtils.getUser();
 
@@ -115,6 +118,7 @@ public class UserService {
 
     // 핸드폰 번호 수정
     @Transactional
+    @Override
     public UserPhoneUpdateResponseDto updatePhoneNumber(UserPhoneUpdateRequestDto req) {
         User user = userUtils.getUser();
 
@@ -131,6 +135,7 @@ public class UserService {
 
     // 닉네임 수정
     @Transactional
+    @Override
     public UserNicknameUpdateResponseDto updateNickname(String  newNickname) {
         User user = userUtils.getUser();
 
@@ -143,6 +148,7 @@ public class UserService {
 
     // 비밀번호 수정
     @Transactional
+    @Override
     public String changePassword(UserPasswordChangeRequestDto requestDto) {
 
         User user = userUtils.getUser();
@@ -158,12 +164,14 @@ public class UserService {
 
     // 회원 탈퇴
     @Transactional
+    @Override
     public void deleteUser(){
         User user = userUtils.getUser();
         userRepository.delete(user);
     }
 
     // 아이디 찾기
+    @Override
     public UserFindIdResponseDto findUserId(UserFindIdRequestDto requestDto) {
 
         User user = userRepository.findByPhone(requestDto.phone())
@@ -175,6 +183,7 @@ public class UserService {
 
         // 비밀번호 찾기 (리셋)
         @Transactional
+        @Override
         public void resetPassword(UserResetPasswordRequestDto requestDto) {
             User user = userRepository.findByEmailAndPhone(requestDto.email(), requestDto.phone())
                     .orElseThrow(() -> new NoSuchElementException("아이디 또는 핸드폰 번호를 다시 확인해 주세요."));

@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class ReissueService {
+public class ReissueServiceImpl implements ReissueService {
     private final JWTUtil jwtUtil;
     private final RedisRefreshTokenRepository refreshRepository;
 
@@ -26,8 +26,7 @@ public class ReissueService {
     private static final long ACCESS_TOKEN_EXPIRATION = 30 * 60;
     private static final long REFRESH_TOKEN_EXPIRATION =  7 * 24 * 60 * 60;
 
-
-
+    @Override
     public ApiResponse<RefreshResponseDto> reissueToken(HttpServletRequest request, HttpServletResponse response) {
         String refresh = getRefreshTokenFromCookies(request);
 

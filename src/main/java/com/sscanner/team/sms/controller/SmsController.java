@@ -5,7 +5,7 @@ import com.sscanner.team.global.exception.BadRequestException;
 import com.sscanner.team.global.exception.ExceptionCode;
 import com.sscanner.team.sms.requestdto.SmsRequestDto;
 import com.sscanner.team.sms.requestdto.SmsVerifyRequestDto;
-import com.sscanner.team.sms.service.SmsService;
+import com.sscanner.team.sms.service.SmsServiceImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,17 +18,17 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/sms")
 public class SmsController {
 
-    private final SmsService smsService;
+    private final SmsServiceImpl smsServiceImpl;
 
     @PostMapping("/send")
     public ApiResponse<?> SendSMS(@RequestBody @Valid SmsRequestDto smsRequestDto){
-        smsService.SendSms(smsRequestDto);
+        smsServiceImpl.SendSms(smsRequestDto);
         return new ApiResponse<>(200,"문자를 전송했습니다",null);
     }
 
     @PostMapping("/verify")
     public ApiResponse<?> verifyCode(@RequestBody @Valid SmsVerifyRequestDto req) {
-        boolean verify = smsService.verifyCode(req);
+        boolean verify = smsServiceImpl.verifyCode(req);
         if (verify) {
             return new ApiResponse<>(200,"인증이 완료되었습니다.",null);
         } else {
