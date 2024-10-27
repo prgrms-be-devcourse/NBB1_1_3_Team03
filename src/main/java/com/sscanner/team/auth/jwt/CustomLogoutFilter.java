@@ -53,7 +53,7 @@ public class CustomLogoutFilter extends GenericFilterBean {
         if (cookies == null) return null;
 
         for (Cookie cookie : cookies) {
-            if (cookie.getName().equals(cookie.getName())) {
+            if ("refresh".equals(cookie.getName())) {
                 return cookie.getValue();
             }
         }
