@@ -22,31 +22,33 @@ public class CustomLogoutFilter extends GenericFilterBean {
 
     private static final String REFRESH_TOKEN = "refresh";
     private static final String LOGOUT_URI = "/logout";
+    private static final String POST_METHOD = "POST";
 
     @Override
-    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
-        doFilter((HttpServletRequest) servletRequest, (HttpServletResponse) servletResponse, filterChain);
-    }
+    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
+            throws IOException, ServletException {
 
-    private void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
+        HttpServletRequest request = (HttpServletRequest) servletRequest;
+        HttpServletResponse response = (HttpServletResponse) servletResponse;
 
         if (!isLogoutRequest(request)) {
-            chain.doFilter(request, response);
+            filterChain.doFilter(request, response);
             return;
         }
 
-        String refresh = getRefreshTokenFromCookies(request.getCookies());
+        String refreshToken = getRefreshTokenFromCookies(request.getCookies());
 
-        if (!isValidRefreshToken(refresh, response)) {
+        if (!isValidRefreshToken(refreshToken, response)) {
             return;
         }
 
-        logout(refresh, response);
+        logout(refreshToken, response);
         response.setStatus(HttpServletResponse.SC_OK);
     }
 
+
     private boolean isLogoutRequest(HttpServletRequest request) {
-        return request.getRequestURI().equals(LOGOUT_URI) && request.getMethod().equals("POST");
+        return LOGOUT_URI.equals(request.getRequestURI()) && POST_METHOD.equals(request.getMethod());
     }
 
     private String getRefreshTokenFromCookies(Cookie[] cookies) {
@@ -93,12 +95,14 @@ public class CustomLogoutFilter extends GenericFilterBean {
     }
 
     private void logout(String refresh, HttpServletResponse response) {
-
         //레디스에서 리프레시 토큰 제거
         String email = jwtUtil.getEmail(refresh);
         refreshRepository.deleteByEmail(email);
+        invalidateCookie(response, REFRESH_TOKEN);
+    }
 
-        // Refresh 토큰 Cookie null ,값 0
+    // Refresh 토큰 Cookie null ,값 0
+    private void invalidateCookie(HttpServletResponse response, String cookieName) {
         Cookie cookie = new Cookie(REFRESH_TOKEN, null);
         cookie.setMaxAge(0);
         cookie.setPath("/");
