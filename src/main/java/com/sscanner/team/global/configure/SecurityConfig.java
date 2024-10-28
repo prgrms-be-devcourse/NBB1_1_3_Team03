@@ -39,25 +39,31 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.csrf((csrf)-> csrf.disable());
+        http.csrf((csrf) -> csrf.disable());
         http.formLogin((auth) -> auth.disable());
         http.httpBasic((auth) -> auth.disable());
 
+        http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         // 경로별 인가
-        http.authorizeHttpRequests((authorize)->
-                authorize.requestMatchers("/login","/", "health","api/users/join","/sms/**","/api/users/reset-password","/api/users/find-id","/reissue").permitAll()
+        http.authorizeHttpRequests((authorize) ->
+                authorize.requestMatchers("/login", "/", "health", "api/users/join", "/sms/**", "/api/users/reset-password", "/api/users/find-id", "/reissue").permitAll()
                         .requestMatchers("/api/admin/boards/**").hasAuthority("ADMIN")
                         .anyRequest().authenticated()
         );
 
-        http.addFilterAfter(new JWTFilter(jwtUtil), LoginFilter.class);
-        http.addFilterAt(
-                new LoginFilter(authenticationManager(authenticationConfiguration),jwtUtil,refreshRepository), UsernamePasswordAuthenticationFilter.class);
-        http.addFilterBefore(new CustomLogoutFilter(jwtUtil, refreshRepository), LogoutFilter.class);
-        http .sessionManagement((session) -> session
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+        configureFilters(http);
 
         return http.build();
     }
 
+    private void configureFilters(HttpSecurity http) throws Exception {
+
+        JWTFilter jwtFilter = new JWTFilter(jwtUtil);
+        LoginFilter loginFilter = new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, refreshRepository);
+        CustomLogoutFilter logoutFilter = new CustomLogoutFilter(jwtUtil, refreshRepository);
+
+        http.addFilterAfter(jwtFilter, LoginFilter.class)
+                .addFilterAt(loginFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(logoutFilter, LogoutFilter.class);
+    }
 }
