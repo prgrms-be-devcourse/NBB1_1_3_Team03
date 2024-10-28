@@ -98,11 +98,11 @@ public class CustomLogoutFilter extends GenericFilterBean {
         //레디스에서 리프레시 토큰 제거
         String email = jwtUtil.getEmail(refresh);
         refreshRepository.deleteByEmail(email);
-        invalidateCookie(response, REFRESH_TOKEN);
+        invalidateCookie(response);
     }
 
     // Refresh 토큰 Cookie null ,값 0
-    private void invalidateCookie(HttpServletResponse response, String cookieName) {
+    private void invalidateCookie(HttpServletResponse response) {
         Cookie cookie = new Cookie(REFRESH_TOKEN, null);
         cookie.setMaxAge(0);
         cookie.setPath("/");
