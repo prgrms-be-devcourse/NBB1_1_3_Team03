@@ -1,5 +1,6 @@
 package com.sscanner.team.auth.service;
 
+import com.sscanner.team.auth.constant.JwtConstants;
 import com.sscanner.team.global.common.response.ApiResponse;
 import com.sscanner.team.global.exception.BadRequestException;
 import com.sscanner.team.global.exception.ExceptionCode;
@@ -21,10 +22,6 @@ public class ReissueServiceImpl implements ReissueService {
     private final JWTUtil jwtUtil;
     private final RedisRefreshTokenRepository refreshRepository;
 
-    private static final String REFRESH_TOKEN = "refresh";
-    private static final String ACCESS_TOKEN = "access";
-    private static final long ACCESS_TOKEN_EXPIRATION = 30L * 60;
-    private static final long REFRESH_TOKEN_EXPIRATION =  7L * 24 * 60 * 60;
 
     @Override
     public ApiResponse<RefreshResponseDto> reissueToken(HttpServletRequest request, HttpServletResponse response) {
@@ -37,14 +34,14 @@ public class ReissueServiceImpl implements ReissueService {
         String authority = jwtUtil.getAuthority(refresh);
 
         // 새 access 토큰 발급
-        String newAccess = jwtUtil.createJwt(ACCESS_TOKEN, email, authority, ACCESS_TOKEN_EXPIRATION);
-        String newRefresh = jwtUtil.createJwt(REFRESH_TOKEN, email, authority, REFRESH_TOKEN_EXPIRATION);
+        String newAccess = jwtUtil.createJwt(JwtConstants.ACCESS_TOKEN, email, authority, JwtConstants.ACCESS_TOKEN_EXPIRATION);
+        String newRefresh = jwtUtil.createJwt(JwtConstants.REFRESH_TOKEN, email, authority,JwtConstants.REFRESH_TOKEN_EXPIRATION);
 
        // 레디스에 리프레시 토큰 저장 (교체함)
-        refreshRepository.save(email, newRefresh, REFRESH_TOKEN_EXPIRATION);
+        refreshRepository.save(email, newRefresh, JwtConstants.REFRESH_TOKEN_EXPIRATION);
 
-        response.setHeader(ACCESS_TOKEN, newAccess);
-        response.addCookie(createCookie(REFRESH_TOKEN, newRefresh));
+        response.setHeader(JwtConstants.ACCESS_TOKEN, newAccess);
+        response.addCookie(createCookie(JwtConstants.REFRESH_TOKEN, newRefresh));
 
         RefreshResponseDto responseDto = RefreshResponseDto.of(newAccess, newRefresh);
         return ApiResponse.ok(200, responseDto, "토큰 재발급 성공");
@@ -53,7 +50,7 @@ public class ReissueServiceImpl implements ReissueService {
     private  String getRefreshTokenFromCookies(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
         for (Cookie cookie : cookies) {
-            if (REFRESH_TOKEN.equals(cookie.getName())) {
+            if (JwtConstants.REFRESH_TOKEN.equals(cookie.getName())) {
                 return cookie.getValue();
             }
         }
@@ -70,7 +67,7 @@ public class ReissueServiceImpl implements ReissueService {
 
     private void validateRefreshCategory(String refresh) {
         String category = jwtUtil.getCategory(refresh);
-        if (!REFRESH_TOKEN.equals(category)) {
+        if (!JwtConstants.REFRESH_TOKEN.equals(category)) {
             throw new BadRequestException(ExceptionCode.INVALID_REFRESH_TOKEN);
         }
     }
