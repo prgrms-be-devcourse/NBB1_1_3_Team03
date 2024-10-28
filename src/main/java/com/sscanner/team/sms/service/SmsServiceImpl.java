@@ -22,7 +22,7 @@ public class SmsServiceImpl implements SmsService {
     private static final SecureRandom secureRandom = new SecureRandom();
 
     @Override
-    public void SendSms(SmsRequestDto smsRequestDto) {
+    public void sendSms(SmsRequestDto smsRequestDto) {
         String phoneNum = smsRequestDto.phoneNum();
 
         if (userRepository.findByPhone(phoneNum).isPresent()) {

@@ -21,8 +21,8 @@ public class SmsController {
     private final SmsServiceImpl smsServiceImpl;
 
     @PostMapping("/send")
-    public ApiResponse<Void> SendSMS(@RequestBody @Valid SmsRequestDto smsRequestDto){
-        smsServiceImpl.SendSms(smsRequestDto);
+    public ApiResponse<Void> sendSMS(@RequestBody @Valid SmsRequestDto smsRequestDto){
+        smsServiceImpl.sendSms(smsRequestDto);
         return new ApiResponse<>(200,"문자를 전송했습니다",null);
     }
 

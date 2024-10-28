@@ -23,8 +23,8 @@ public class ReissueServiceImpl implements ReissueService {
 
     private static final String REFRESH_TOKEN = "refresh";
     private static final String ACCESS_TOKEN = "access";
-    private static final long ACCESS_TOKEN_EXPIRATION = 30 * 60;
-    private static final long REFRESH_TOKEN_EXPIRATION =  7 * 24 * 60 * 60;
+    private static final long ACCESS_TOKEN_EXPIRATION = 30L * 60;
+    private static final long REFRESH_TOKEN_EXPIRATION =  7L * 24 * 60 * 60;
 
     @Override
     public ApiResponse<RefreshResponseDto> reissueToken(HttpServletRequest request, HttpServletResponse response) {
