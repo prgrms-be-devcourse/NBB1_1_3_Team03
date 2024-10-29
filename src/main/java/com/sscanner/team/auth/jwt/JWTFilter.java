@@ -1,4 +1,4 @@
-package com.sscanner.team.jwt;
+package com.sscanner.team.auth.jwt;
 
 import com.sscanner.team.user.entity.User;
 import com.sscanner.team.user.responsedto.UserDetailsImpl;

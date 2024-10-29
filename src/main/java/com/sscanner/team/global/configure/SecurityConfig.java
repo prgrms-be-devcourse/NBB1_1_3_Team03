@@ -1,10 +1,10 @@
 package com.sscanner.team.global.configure;
 
-import com.sscanner.team.jwt.CustomLogoutFilter;
-import com.sscanner.team.jwt.JWTFilter;
-import com.sscanner.team.jwt.JWTUtil;
-import com.sscanner.team.jwt.LoginFilter;
-import com.sscanner.team.user.repository.RefreshRepository;
+import com.sscanner.team.auth.jwt.CustomLogoutFilter;
+import com.sscanner.team.auth.jwt.JWTFilter;
+import com.sscanner.team.auth.jwt.JWTUtil;
+import com.sscanner.team.auth.jwt.LoginFilter;
+import com.sscanner.team.auth.repository.RedisRefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,7 +25,7 @@ public class SecurityConfig {
 
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JWTUtil jwtUtil;
-    private final RefreshRepository refreshRepository;
+    private final RedisRefreshTokenRepository refreshRepository;
 
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
@@ -39,24 +39,31 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.csrf((csrf)-> csrf.disable());
+        http.csrf((csrf) -> csrf.disable());
         http.formLogin((auth) -> auth.disable());
         http.httpBasic((auth) -> auth.disable());
 
+        http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         // 경로별 인가
-        http.authorizeHttpRequests((authorize)->
-                authorize.requestMatchers("/login","/", "health","api/users/join","/sms/**","/api/users/reset-password","/api/users/find-id").permitAll()
+        http.authorizeHttpRequests((authorize) ->
+                authorize.requestMatchers("/login", "/", "health", "api/users/join", "/sms/**", "/api/users/reset-password", "/api/users/find-id", "/reissue").permitAll()
                         .requestMatchers("/api/admin/boards/**").hasAuthority("ADMIN")
                         .anyRequest().authenticated()
         );
 
-        http.addFilterAfter(new JWTFilter(jwtUtil), LoginFilter.class);
-        http.addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration),jwtUtil,refreshRepository), UsernamePasswordAuthenticationFilter.class);
-        http.addFilterBefore(new CustomLogoutFilter(jwtUtil, refreshRepository), LogoutFilter.class);
-        http .sessionManagement((session) -> session
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+        configureFilters(http);
 
         return http.build();
     }
 
+    private void configureFilters(HttpSecurity http) throws Exception {
+
+        JWTFilter jwtFilter = new JWTFilter(jwtUtil);
+        LoginFilter loginFilter = new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, refreshRepository);
+        CustomLogoutFilter logoutFilter = new CustomLogoutFilter(jwtUtil, refreshRepository);
+
+        http.addFilterAfter(jwtFilter, LoginFilter.class)
+                .addFilterAt(loginFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(logoutFilter, LogoutFilter.class);
+    }
 }

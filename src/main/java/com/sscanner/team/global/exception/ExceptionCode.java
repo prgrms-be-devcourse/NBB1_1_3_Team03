@@ -62,7 +62,8 @@ public enum ExceptionCode {
     UNAUTHORIZED(401, "인증에 실패했습니다."),
     SAME_PHONE_NUMBER(400,"입력한 번호가 현재 등록된 번호와 동일합니다."),
     PHONE_VERIFICATION_FAILED(400, "핸드폰 인증에 실패하였습니다."),
-    USER_NOT_FOUND_BY_PHONE(400,"해당 번호로 가입된 사용자가 없습니다.")
+    USER_NOT_FOUND_BY_PHONE(400,"해당 번호로 가입된 사용자가 없습니다."),
+    INSTANCE_NOT_ALLOWED(500, "이 클래스는 인스턴스화할 수 없습니다.");
     ;
 
     private final int code;

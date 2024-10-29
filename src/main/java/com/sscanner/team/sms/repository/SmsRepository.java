@@ -1,4 +1,4 @@
-package com.sscanner.team.user.repository;
+package com.sscanner.team.sms.repository;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -10,20 +10,20 @@ import java.time.Duration;
 @Repository
 public class SmsRepository {
 
-    private final String PREFIX = "sms:"; // 키
-
+    private static final String PREFIX = "sms:"; // 키
     private final StringRedisTemplate stringRedisTemplate;
+    private static final int LIMIT_TIME = 60 * 120; // 유효시간 (2분)
+
 
     // 인증 정보 저장
     public void createSmsCertification(String phone, String code) {
-        int LIMIT_TIME = 60 * 120; // 유효시간 (2분)
         stringRedisTemplate.opsForValue()
                 .set(PREFIX + phone, code, Duration.ofSeconds(LIMIT_TIME));
     }
 
     // 인증 정보 조회
     public String getSmsCertification(String phone) {
-        return stringRedisTemplate.opsForValue().get(PREFIX + phone);
+        return stringRedisTemplate.opsForValue().get(PREFIX+ phone);
     }
 
     //인증 정보 삭제
