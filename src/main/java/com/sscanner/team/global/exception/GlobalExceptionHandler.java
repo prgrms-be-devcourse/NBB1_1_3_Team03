@@ -20,7 +20,6 @@ public class GlobalExceptionHandler{
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiResponse<?> handleBadRequestException(final BadRequestException e) {
 
-        log.warn(e.getMessage(), e);
 
         return ApiResponse.error(e.getCode(), e.getMessage());
     }
@@ -30,8 +29,6 @@ public class GlobalExceptionHandler{
     @ResponseStatus(HttpStatus.CONFLICT)
     public ApiResponse<?> handleDuplicateException(final DuplicateException e) {
 
-        log.warn(e.getMessage(), e);
-
         return ApiResponse.error(e.getCode(), e.getMessage());
     }
 
@@ -40,8 +37,6 @@ public class GlobalExceptionHandler{
     public ApiResponse<?> handleValidateException(final MethodArgumentNotValidException e) {
 
         final String errMessage = Objects.requireNonNull(e.getBindingResult().getFieldError()).getDefaultMessage();
-
-        log.warn(e.getMessage(), e);
 
         return ApiResponse.error(400, errMessage);
     }

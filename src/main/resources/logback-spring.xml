@@ -2,8 +2,8 @@
 <configuration>
     <!-- Custom Highlight Converter -->
     <conversionRule conversionWord="highlight" converterClass="com.sscanner.team.global.configure.CustomHighlightConverter"/>
-    <timestamp key="BY_DATE" datePattern="yyyy-MM-dd"/>
-    <property name ="LOG_PATTERN" value="%cyan(%d{yyyy-MM-dd HH:mm:ss.SSS}) [%thread] [traceId=%X{traceId}] %highlight(%-5level) %magenta(%logger{36}) - %msg %n" />
+    <timestamp key="BY_DATE" datePattern="yyyy-MM-dd" timeZone="Asia/Seoul"/>
+    <property name ="LOG_PATTERN" value="%cyan(%d{yyyy-MM-dd HH:mm:ss.SSS, Asia/Seoul}) [%thread] [traceId=%X{traceId}] %highlight(%-5level) %magenta(%logger{36}) - %msg %n" />
 
     <springProfile name="!prod">
         <include resource="console-appender.xml"/>
