@@ -1,32 +1,33 @@
-package com.sscanner.team.products.entity;
+package com.sscanner.team.products.entity
 
+import com.sscanner.team.global.common.BaseEntity
+import jakarta.persistence.*
 
-import com.sscanner.team.global.common.BaseEntity;
-import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-
-import static lombok.AccessLevel.*;
-
-@Getter
 @Entity
 @Table(name = "product_img")
-@NoArgsConstructor(access = PROTECTED)
-public class ProductImg extends BaseEntity {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+class ProductImg(
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "product_img_id", nullable = false)
-    private Long id;
+    val id: Long? = null, // val로 불변성 보장
 
     @Column(name = "product_id", nullable = false)
-    private Long productId;
+    val productId: Long, // val로 불변성 보장
 
     @Column(name = "product_img_url", nullable = false)
-    private String url;
+    val url: String // val로 불변성 보장
+) : BaseEntity() {
 
-    @Builder
-    public ProductImg(long productId, String url) {
-        this.productId = productId;
-        this.url = url;
+    // JPA가 사용할 기본 생성자
+    protected constructor() : this(productId = 0, url = "")
+
+    companion object {
+        fun create(productId: Long, url: String): ProductImg {
+            return ProductImg(productId = productId, url = url)
+        }
+    }
+
+    override fun toString(): String {
+        return "ProductImg(id=$id, productId=$productId, url=$url)"
     }
 }
