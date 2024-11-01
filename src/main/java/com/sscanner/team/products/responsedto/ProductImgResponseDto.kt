@@ -1,20 +1,22 @@
-package com.sscanner.team.products.responsedto;
+package com.sscanner.team.products.responsedto
 
-import com.sscanner.team.products.entity.ProductImg;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
+import com.sscanner.team.products.entity.ProductImg
+import jakarta.validation.constraints.NotEmpty
+import jakarta.validation.constraints.NotNull
 
-public record ProductImgResponseDto (
-        @NotNull
-        Long productId,
-        @NotEmpty
-        String url
+data class ProductImgResponseDto(
+    @field:NotNull
+    val productId: Long,
+
+    @field:NotEmpty
+    val url: String
 ) {
-
-    public static ProductImgResponseDto from(ProductImg productImg) {
-        return new ProductImgResponseDto(
-                productImg.getProductId(),
-                productImg.getUrl()
-        );
+    companion object {
+        fun from(productImg: ProductImg): ProductImgResponseDto {
+            return ProductImgResponseDto(
+                productId = productImg.productId,
+                url = productImg.url
+            )
+        }
     }
 }
