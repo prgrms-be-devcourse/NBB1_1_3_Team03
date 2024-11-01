@@ -1,15 +1,6 @@
-package com.sscanner.team.global.exception;
+package com.sscanner.team.global.exception
 
-import lombok.Getter;
-
-@Getter
-public class BadRequestException extends RuntimeException {
-
-    private final int code;
-    private final String message;
-
-    public BadRequestException(final ExceptionCode exceptionCode) {
-        this.code = exceptionCode.getCode();
-        this.message = exceptionCode.getMessage();
-    }
+class BadRequestException(exceptionCode: ExceptionCode) : RuntimeException() {
+    val code = exceptionCode.code
+    override val message: String = exceptionCode.message
 }
