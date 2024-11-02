@@ -1,24 +1,21 @@
-package com.sscanner.team.points.scheduler;
+package com.sscanner.team.points.scheduler
 
-
-import com.sscanner.team.points.service.PointBackupService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
+import com.sscanner.team.points.service.PointBackupService
+import org.springframework.scheduling.annotation.Scheduled
+import org.springframework.stereotype.Component
 
 @Component
-@RequiredArgsConstructor
-public class PointScheduler {
+class PointScheduler(private val pointBackupService: PointBackupService) {
 
-    private final PointBackupService pointBackupService;
-
+    // 매일 오전 3시에 MySQL로 포인트를 백업합니다.
     @Scheduled(cron = "0 0 3 * * ?")
-    public void backupPointsToMySQL() {
-        pointBackupService.backupPointsToMySQL();
+    fun backupPointsToMySQL() {
+        pointBackupService.backupPointsToMySQL()
     }
 
+    // 매일 자정에 캐시된 일일 포인트 제한을 초기화합니다.
     @Scheduled(cron = "0 0 0 * * ?")
-    public void resetDailyPointLimit() {
-        pointBackupService.resetDailyPointsInCache();
+    fun resetDailyPointLimit() {
+        pointBackupService.resetDailyPointsInCache()
     }
 }
