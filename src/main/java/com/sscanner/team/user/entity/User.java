@@ -2,10 +2,8 @@ package com.sscanner.team.user.entity;
 
 import com.sscanner.team.global.common.BaseEntity;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
@@ -13,7 +11,6 @@ import org.hibernate.annotations.Where;
 @Entity
 @SQLDelete(sql = "UPDATE user SET deleted_at = NOW() WHERE user_id = ?")
 @Where(clause = "deleted_at is NULL")
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Table(name = "USER")
 public class User extends BaseEntity {
@@ -47,6 +44,9 @@ public class User extends BaseEntity {
         this.phone = phone;
         this.authority = authority;
 
+    }
+
+    public User() {
     }
 
     public void changeNickname(String newNickname) {
