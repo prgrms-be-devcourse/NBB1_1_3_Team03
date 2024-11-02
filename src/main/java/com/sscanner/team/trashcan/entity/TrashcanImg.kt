@@ -1,44 +1,61 @@
-package com.sscanner.team.trashcan.entity;
+package com.sscanner.team.trashcan.entity
 
-import com.sscanner.team.global.common.BaseEntity;
-import com.sscanner.team.trashcan.type.TrashCategory;
-import com.sscanner.team.trashcan.type.TrashcanStatus;
-import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.SQLRestriction;
+import com.sscanner.team.global.common.BaseEntity
+import jakarta.persistence.*
 
-import java.math.BigDecimal;
-
-
-@SQLDelete(sql = "UPDATE trashcan_img SET deleted_at = CURRENT_TIMESTAMP WHERE trashcan_img_id = ?")
-@SQLRestriction("deleted_at is NULL")
-@NoArgsConstructor
-@Getter
 @Entity
 @Table(name = "Trashcan_img")
-public class TrashcanImg extends BaseEntity {
-
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+class TrashcanImg : BaseEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "trashcan_img_id", nullable = false)
-    private Long id;
+    var id: Long? = null
+        private set
 
     @Column(name = "trashcan_id", nullable = false)
-    private Long trashcanId;
+    var trashcanId: Long? = null
+        private set
 
     @Column(name = "trashcan_img_url", nullable = false)
-    private String trashcanImgUrl;
+    var trashcanImgUrl: String? = null
+        private set
 
-    @Builder
-    public TrashcanImg(Long trashcanId, String trashcanImgUrl) {
-        this.trashcanId = trashcanId;
-        this.trashcanImgUrl = trashcanImgUrl;
-
+    constructor(trashcanId: Long?, trashcanImgUrl: String?) {
+        this.trashcanId = trashcanId
+        this.trashcanImgUrl = trashcanImgUrl
     }
 
-    public void changeImgUrl(String chosenImgUrl) {
-        this.trashcanImgUrl = chosenImgUrl;
+    constructor()
+
+    fun changeImgUrl(chosenImgUrl: String?) {
+        this.trashcanImgUrl = chosenImgUrl
+    }
+
+    class TrashcanImgBuilder internal constructor() {
+        private var trashcanId: Long? = null
+        private var trashcanImgUrl: String? = null
+        fun trashcanId(trashcanId: Long?): TrashcanImgBuilder {
+            this.trashcanId = trashcanId
+            return this
+        }
+
+        fun trashcanImgUrl(trashcanImgUrl: String?): TrashcanImgBuilder {
+            this.trashcanImgUrl = trashcanImgUrl
+            return this
+        }
+
+        fun build(): TrashcanImg {
+            return TrashcanImg(this.trashcanId, this.trashcanImgUrl)
+        }
+
+        override fun toString(): String {
+            return "TrashcanImg.TrashcanImgBuilder(trashcanId=" + this.trashcanId + ", trashcanImgUrl=" + this.trashcanImgUrl + ")"
+        }
+    }
+
+    companion object {
+        fun builder(): TrashcanImgBuilder {
+            return TrashcanImgBuilder()
+        }
     }
 }
