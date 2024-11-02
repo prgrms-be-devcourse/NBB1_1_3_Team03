@@ -2,12 +2,14 @@ package com.sscanner.team.user.entity;
 
 import com.sscanner.team.global.common.BaseEntity;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
 @Builder(toBuilder = true)
-@Getter
 @Entity
 @SQLDelete(sql = "UPDATE user SET deleted_at = NOW() WHERE user_id = ?")
 @Where(clause = "deleted_at is NULL")
@@ -16,7 +18,8 @@ import org.hibernate.annotations.Where;
 @Table(name = "USER")
 public class User extends BaseEntity {
 
-    @Id @GeneratedValue(strategy = GenerationType.UUID)
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "user_id", nullable = false, length = 36, updatable = false)
     private String userId;
 
@@ -37,7 +40,7 @@ public class User extends BaseEntity {
 
 
     @Builder
-    public User( String email, String password, String nickname, String phone, String authority) {
+    public User(String email, String password, String nickname, String phone, String authority) {
         this.email = email;
         this.password = password;
         this.nickname = nickname;
@@ -66,4 +69,27 @@ public class User extends BaseEntity {
         return this.phone.equals(phone);
     }
 
+    public String getUserId() {
+        return this.userId;
+    }
+
+    public String getEmail() {
+        return this.email;
+    }
+
+    public String getPassword() {
+        return this.password;
+    }
+
+    public String getNickname() {
+        return this.nickname;
+    }
+
+    public String getPhone() {
+        return this.phone;
+    }
+
+    public String getAuthority() {
+        return this.authority;
+    }
 }
