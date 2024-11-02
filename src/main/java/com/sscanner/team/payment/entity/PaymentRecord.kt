@@ -1,48 +1,44 @@
-package com.sscanner.team.payment.entity;
+package com.sscanner.team.payment.entity
 
+import com.sscanner.team.global.common.BaseEntity
+import com.sscanner.team.products.entity.Product
+import com.sscanner.team.user.entity.User
+import com.sscanner.team.util.UUIDConverter
+import jakarta.persistence.*
+import java.util.*
 
-import com.sscanner.team.global.common.BaseEntity;
-import com.sscanner.team.user.entity.User;
-import com.sscanner.team.products.entity.Product;
-import com.sscanner.team.util.UUIDConverter;
-import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-
-import java.util.UUID;
-
-@Getter
 @Entity
 @Table(name = "payment_record")
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class PaymentRecord extends BaseEntity {
+class PaymentRecord(
     @Id
-    @Convert(converter = UUIDConverter.class)
+    @Convert(converter = UUIDConverter::class)
     @Column(name = "payment_record_id", nullable = false, length = 16)
-    private UUID id;
+    val id: UUID? = null, // 읽기 전용으로 변경
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    val user: User, // 읽기 전용으로 변경
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "product_id", nullable = false)
-    private Product product;
+    val product: Product, // 읽기 전용으로 변경
 
     @Column(name = "payment", nullable = false)
-    private Integer payment;
+    val payment: Int, // 읽기 전용으로 변경
 
     @Column(name = "barcode_url", nullable = false)
-    private String barcodeUrl;
+    val barcodeUrl: String // 읽기 전용으로 변경
+) : BaseEntity() {
 
-    @Builder
-    public PaymentRecord(UUID id, User user, Product product, Integer payment, String barcodeUrl) {
-        this.id = id;
-        this.user = user;
-        this.product = product;
-        this.payment = payment;
-        this.barcodeUrl = barcodeUrl;
+    constructor() : this(id = null, user = User(), product = Product(), payment = 0, barcodeUrl = "")
+
+    companion object {
+        fun create(id: UUID? = null, user: User, product: Product, payment: Int, barcodeUrl: String): PaymentRecord {
+            return PaymentRecord(id = id, user = user, product = product, payment = payment, barcodeUrl = barcodeUrl)
+        }
+    }
+
+    override fun toString(): String {
+        return "PaymentRecord(id=$id, user=$user, product=$product, payment=$payment, barcodeUrl='$barcodeUrl')"
     }
 }

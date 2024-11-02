@@ -1,10 +1,12 @@
-package com.sscanner.team.payment.responsedto;
+package com.sscanner.team.payment.responsedto
 
-public record PointPaymentResponseDto(
-        String userId,
-        Integer point
+data class PointPaymentResponseDto(
+    val userId: String,
+    val point: Int
 ) {
-    public static PointPaymentResponseDto of(String userId, Integer point) {
-        return new PointPaymentResponseDto(userId, point);
+    companion object {
+        fun of(userId: String, point: Int): PointPaymentResponseDto {
+            return PointPaymentResponseDto(userId, point)
+        }
     }
 }

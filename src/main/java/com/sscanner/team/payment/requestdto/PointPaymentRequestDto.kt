@@ -1,7 +1,6 @@
-package com.sscanner.team.payment.requestdto;
+package com.sscanner.team.payment.requestdto
 
-public record PointPaymentRequestDto(
-        String userId,
-        Long productId
-) {
-}
+data class PointPaymentRequestDto(
+    val userId: String,
+    val productId: Long
+)

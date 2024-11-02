@@ -1,7 +1,6 @@
-package com.sscanner.team.payment.repository;
+package com.sscanner.team.payment.repository
 
-import com.sscanner.team.payment.entity.PaymentRecord;
-import org.springframework.data.jpa.repository.JpaRepository;
+import com.sscanner.team.payment.entity.PaymentRecord
+import org.springframework.data.jpa.repository.JpaRepository
 
-public interface PaymentRepository extends JpaRepository<PaymentRecord, String> {
-}
+interface PaymentRepository : JpaRepository<PaymentRecord, String>
