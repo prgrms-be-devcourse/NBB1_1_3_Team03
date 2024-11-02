@@ -1,6 +1,6 @@
-package com.sscanner.team.points.service;
+package com.sscanner.team.points.service
 
-public interface PointBackupService {
-    void backupPointsToMySQL();
-    void resetDailyPointsInCache();
+interface PointBackupService {
+    fun backupPointsToMySQL()
+    fun resetDailyPointsInCache()
 }

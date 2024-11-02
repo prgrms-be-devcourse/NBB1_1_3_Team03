@@ -1,21 +1,19 @@
-package com.sscanner.team.points.service;
+package com.sscanner.team.points.service
 
-import com.sscanner.team.points.entity.UserPoint;
-import com.sscanner.team.points.dto.requestdto.PointRequestDto;
-import com.sscanner.team.points.dto.responsedto.PointWithUserIdResponseDto;
+import com.sscanner.team.points.dto.requestdto.PointRequestDto
+import com.sscanner.team.points.dto.responsedto.PointWithUserIdResponseDto
+import com.sscanner.team.points.entity.UserPoint
 
-import java.util.Set;
-
-public interface PointService {
-    PointWithUserIdResponseDto getCachedPoint(String userId);
-    PointWithUserIdResponseDto addPoint(PointRequestDto pointRequestDto);
-    Integer fetchCachedPoint(String userId);
-    UserPoint findByUserId(String userId);
-    void markUserForBackup(String userId);
-    void updateUserPoint(UserPoint userPoint);
-    void removeBackupFlag(String userId);
-    void decrementPoint(String userId, int productPrice);
-    Set<String> getFlaggedUsersForBackup();
-    Integer getPoint(String userId);
-    void resetDailyPointsInCache();
+interface PointService {
+    fun getCachedPoint(userId: String): PointWithUserIdResponseDto
+    fun addPoint(pointRequestDto: PointRequestDto): PointWithUserIdResponseDto
+    fun fetchCachedPoint(userId: String): Int
+    fun findByUserId(userId: String): UserPoint
+    fun markUserForBackup(userId: String)
+    fun updateUserPoint(userPoint: UserPoint)
+    fun removeBackupFlag(userId: String)
+    fun decrementPoint(userId: String, productPrice: Int)
+    val flaggedUsersForBackup: Set<String>
+    fun getPoint(userId: String): Int
+    fun resetDailyPointsInCache()
 }

@@ -1,17 +1,15 @@
-package com.sscanner.team.points.redis;
+package com.sscanner.team.points.redis
 
-import java.util.Set;
-
-public interface PointRedisService {
-    Integer getPoint(String userId);
-    Integer getDailyPoint(String userId);
-    void updatePoint(String userId, Integer point);
-    void incrementPoint(String userId, Integer incrementValue);
-    void incrementDailyPoint(String userId, Integer incrementValue);
-    void decrementPoint(String userId, Integer decrementValue);
-    void flagUserForBackup(String userId);
-    void removeBackupFlag(String userId);
-    void resetDailyPoints();
-    Set<String> scanKeys(String pattern);
-    Set<String> getFlaggedUsers();
+interface PointRedisService {
+    fun getPoint(userId: String): Int
+    fun getDailyPoint(userId: String): Int
+    fun updatePoint(userId: String, point: Int)
+    fun incrementPoint(userId: String, incrementValue: Int)
+    fun incrementDailyPoint(userId: String, incrementValue: Int)
+    fun decrementPoint(userId: String, decrementValue: Int)
+    fun flagUserForBackup(userId: String)
+    fun removeBackupFlag(userId: String)
+    fun resetDailyPoints()
+    fun scanKeys(pattern: String): Set<String>
+    val flaggedUsers: Set<String>
 }

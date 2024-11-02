@@ -1,122 +1,127 @@
-package com.sscanner.team.points.service;
+package com.sscanner.team.points.service
 
-import com.sscanner.team.points.entity.UserPoint;
-import com.sscanner.team.points.dto.PointUpdateDto;
-import jakarta.annotation.PreDestroy;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.stereotype.Service;
+import com.sscanner.team.points.common.PointConstants
+import com.sscanner.team.points.dto.PointUpdateDto
+import jakarta.annotation.PreDestroy
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
+import org.springframework.stereotype.Service
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledExecutorService
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.locks.ReentrantLock
 
-import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.ReentrantLock;
-
-import static com.sscanner.team.points.common.PointConstants.*;
 @Service
-@Slf4j
-@RequiredArgsConstructor
-public class PointBackupServiceImpl implements PointBackupService {
+class PointBackupServiceImpl(
+    private val pointService: PointService,
+    private val pointTaskExecutor: ThreadPoolTaskExecutor
+) : PointBackupService {
+    private val scheduledExecutorService: ScheduledExecutorService = Executors.newScheduledThreadPool(5)
+    private val lock = ReentrantLock()
 
-    private final PointService pointService;
-    private final ThreadPoolTaskExecutor pointTaskExecutor;
-    private final ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(5);
-    private final ReentrantLock lock = new ReentrantLock();
-
-    @Override
-    public void backupPointsToMySQL() {
-        Set<String> flaggedUsers = pointService.getFlaggedUsersForBackup();
-        runBackupAsyncForUsers(flaggedUsers);
+    override fun backupPointsToMySQL() {
+        val flaggedUsers = pointService.flaggedUsersForBackup
+        runBackupAsyncForUsers(flaggedUsers)
     }
 
-    private void runBackupAsyncForUsers(Set<String> flaggedUsers) {
-        for (String flaggedUserId : flaggedUsers) {
-            String userId = flaggedUserId.replace(BACKUP_FLAG_PREFIX, "");
-            CompletableFuture.runAsync(() -> processPointBackup(userId), pointTaskExecutor)
-                    .exceptionally(ex -> {
-                        log.error("Backup failed for user {}", userId, ex);
-                        return null;
-                    });
+    private fun runBackupAsyncForUsers(flaggedUsers: Set<String>) {
+        flaggedUsers.forEach { userId ->
+            val cleanUserId = userId.replace(PointConstants.BACKUP_FLAG_PREFIX, "")
+            CompletableFuture.runAsync({ processPointBackup(cleanUserId) }, pointTaskExecutor)
+                .exceptionally { ex ->
+                    log.error("Backup failed for user {}", cleanUserId, ex)
+                    null
+                }
         }
     }
 
-    private void processPointBackup(String userId) {
-        retryAsync(() -> backupUserPoints(userId), RETRY_MAX_ATTEMPTS, RETRY_DELAY);
+    private fun processPointBackup(userId: String) {
+        retryAsync(
+            { backupUserPoints(userId) },
+            PointConstants.RETRY_MAX_ATTEMPTS,
+            PointConstants.RETRY_DELAY
+        )
     }
 
-    private void retryAsync(Runnable task, int attempts, long delay) {
-        CompletableFuture.runAsync(() -> {
+    private fun retryAsync(task: Runnable, attempts: Int, delay: Long) {
+        CompletableFuture.runAsync({
             try {
-                task.run();
-            } catch (Exception e) {
-                handleRetryFailure(task, attempts, delay, e);
+                task.run()
+            } catch (e: Exception) {
+                handleRetryFailure(task, attempts, delay, e)
             }
-        }, pointTaskExecutor);
+        }, pointTaskExecutor)
     }
 
-    private void handleRetryFailure(Runnable task, int attempts, long delay, Exception e) {
+    private fun handleRetryFailure(task: Runnable, attempts: Int, delay: Long, e: Exception) {
         if (attempts > 0) {
-            log.error("Attempt failed, retrying... Attempts left: {}, delay: {}ms", attempts, delay, e);
-            scheduledExecutorService.schedule(() -> retryAsync(task, attempts - 1, delay * 2), delay, TimeUnit.MILLISECONDS);
+            log.error("Attempt failed, retrying... Attempts left: {}, delay: {}ms", attempts, delay, e)
+            scheduledExecutorService.schedule(
+                { retryAsync(task, attempts - 1, delay * 2) },
+                delay,
+                TimeUnit.MILLISECONDS
+            )
         } else {
-            log.error("Max retry attempts reached. Task failed.");
+            log.error("Max retry attempts reached. Task failed.")
         }
     }
 
-    private void backupUserPoints(String userId) {
-        Integer currentCachedPoint = pointService.getPoint(userId);
-        if (currentCachedPoint != null) {
-            updateUserPointsWithLock(userId, currentCachedPoint);
-        }
-        removeBackupFlagWithLock(userId);
+    private fun backupUserPoints(userId: String) {
+        val currentCachedPoint = pointService.getPoint(userId)
+        updateUserPointsWithLock(userId, currentCachedPoint)
+        removeBackupFlagWithLock(userId)
     }
 
-    private void updateUserPointsWithLock(String userId, Integer currentCachedPoint) {
-        lock.lock();
+    private fun updateUserPointsWithLock(userId: String, currentCachedPoint: Int) {
+        lock.lock()
         try {
-            PointUpdateDto updateDto = createPointUpdateRequestDto(userId, currentCachedPoint);
-            pointService.updateUserPoint(updateDto.toEntity());
+            val userPoint = pointService.findByUserId(userId)
+            userPoint.let {
+                val updateDto = PointUpdateDto.of(
+                    userPointId = it.id,
+                    user = it.user,
+                    newPoint = currentCachedPoint
+                )
+                pointService.updateUserPoint(updateDto.toEntity())
+            }
         } finally {
-            lock.unlock();
+            lock.unlock()
         }
     }
 
-    private PointUpdateDto createPointUpdateRequestDto(String userId, Integer currentCachedPoint) {
-        UserPoint userPoint = pointService.findByUserId(userId);
-        return PointUpdateDto.of(userPoint.getId(), userPoint.getUser(), currentCachedPoint);
-    }
-
-    private void removeBackupFlagWithLock(String userId) {
-        lock.lock();
+    private fun removeBackupFlagWithLock(userId: String) {
+        lock.lock()
         try {
-            pointService.removeBackupFlag(userId);
+            pointService.removeBackupFlag(userId)
         } finally {
-            lock.unlock();
+            lock.unlock()
         }
     }
 
-    @Override
-    public void resetDailyPointsInCache() {
-        pointService.resetDailyPointsInCache();
+    override fun resetDailyPointsInCache() {
+        pointService.resetDailyPointsInCache()
     }
 
     @PreDestroy
-    public void shutdown() {
-        pointTaskExecutor.shutdown();
+    fun shutdown() {
+        pointTaskExecutor.shutdown()
         try {
             if (!hasTaskExecutorTerminated(pointTaskExecutor)) {
-                pointTaskExecutor.getThreadPoolExecutor().shutdownNow();
+                pointTaskExecutor.threadPoolExecutor.shutdownNow()
             }
-        } catch (InterruptedException ex) {
-            pointTaskExecutor.getThreadPoolExecutor().shutdownNow();
-            Thread.currentThread().interrupt();
+        } catch (ex: InterruptedException) {
+            pointTaskExecutor.threadPoolExecutor.shutdownNow()
+            Thread.currentThread().interrupt()
         }
     }
 
-    private boolean hasTaskExecutorTerminated(ThreadPoolTaskExecutor taskExecutor) throws InterruptedException {
-        return taskExecutor.getThreadPoolExecutor().awaitTermination(30, TimeUnit.SECONDS);
+    private fun hasTaskExecutorTerminated(taskExecutor: ThreadPoolTaskExecutor): Boolean {
+        return taskExecutor.threadPoolExecutor.awaitTermination(30, TimeUnit.SECONDS)
+    }
+
+    companion object {
+        private val log: Logger = LoggerFactory.getLogger(PointBackupServiceImpl::class.java)
     }
 }
