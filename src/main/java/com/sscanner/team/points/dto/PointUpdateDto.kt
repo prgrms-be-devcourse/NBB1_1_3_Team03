@@ -1,25 +1,25 @@
-package com.sscanner.team.points.dto;
+package com.sscanner.team.points.dto
 
-import com.sscanner.team.user.entity.User;
-import com.sscanner.team.points.entity.UserPoint;
+import com.sscanner.team.points.entity.UserPoint
+import com.sscanner.team.user.entity.User
+import java.util.*
 
-import java.util.UUID;
-
-
-public record PointUpdateDto(
-        UUID userPointId,
-        User user,
-        Integer newPoint
+data class PointUpdateDto(
+    val userPointId: UUID,
+    val user: User,
+    val newPoint: Int
 ) {
-    public static PointUpdateDto of(UUID userPointId, User user, Integer newPoint) {
-        return new PointUpdateDto(userPointId, user, newPoint);
+    fun toEntity(): UserPoint {
+        return UserPoint.create(
+            id = userPointId,
+            user = user,
+            point = newPoint
+        )
     }
 
-    public UserPoint toEntity() {
-        return UserPoint.builder()
-                .id(userPointId)
-                .user(user)
-                .point(newPoint)
-                .build();
+    companion object {
+        fun of(userPointId: UUID, user: User, newPoint: Int): PointUpdateDto {
+            return PointUpdateDto(userPointId, user, newPoint)
+        }
     }
 }

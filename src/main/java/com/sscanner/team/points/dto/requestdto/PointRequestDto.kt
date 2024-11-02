@@ -1,8 +1,8 @@
-package com.sscanner.team.points.dto.requestdto;
+package com.sscanner.team.points.dto.requestdto
 
 
-public record PointRequestDto(
-        String userId,
-        Integer point
-) {
-}
+@JvmRecord
+data class PointRequestDto(
+    val userId: String,
+    val point: Int
+)
