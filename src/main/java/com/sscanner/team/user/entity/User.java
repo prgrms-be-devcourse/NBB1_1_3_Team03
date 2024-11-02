@@ -7,11 +7,9 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
 @Builder(toBuilder = true)
-@Getter
 @Entity
 @SQLDelete(sql = "UPDATE user SET deleted_at = NOW() WHERE user_id = ?")
 @Where(clause = "deleted_at is NULL")
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Table(name = "USER")
 public class User extends BaseEntity {
@@ -35,6 +33,9 @@ public class User extends BaseEntity {
     @Column(name = "authority", nullable = false, length = 10)
     private String authority;
 
+
+    public User() {
+    }
 
     @Builder
     public User( String email, String password, String nickname, String phone, String authority) {
@@ -66,4 +67,27 @@ public class User extends BaseEntity {
         return this.phone.equals(phone);
     }
 
+    public String getUserId() {
+        return userId;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public String getNickname() {
+        return nickname;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public String getAuthority() {
+        return authority;
+    }
 }
