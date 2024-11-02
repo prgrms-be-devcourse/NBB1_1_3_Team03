@@ -1,105 +1,84 @@
-package com.sscanner.team.points.redis;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.Cursor;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ScanOptions;
-import org.springframework.stereotype.Service;
+package com.sscanner.team.points.redis
 
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
+import com.sscanner.team.points.common.PointConstants
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import org.springframework.data.redis.core.RedisTemplate
+import org.springframework.data.redis.core.ScanOptions
+import org.springframework.stereotype.Service
+import java.util.concurrent.TimeUnit
 
-import static com.sscanner.team.points.common.PointConstants.*;
-
-
-@Slf4j
 @Service
-@RequiredArgsConstructor
-public class PointRedisServiceImpl implements PointRedisService {
+class PointRedisServiceImpl(private val redisTemplate: RedisTemplate<String, Int>) : PointRedisService {
 
-    private final RedisTemplate<String, Integer> redisTemplate;
-
-    @Override
-    public Integer getPoint(String userId) {
-        return redisTemplate.opsForValue().get(getKey(userId));
+    override fun getPoint(userId: String): Int {
+        return redisTemplate.opsForValue()[getKey(userId)]!!
     }
 
-    @Override
-    public Integer getDailyPoint(String userId) {
-        return Optional.ofNullable(redisTemplate.opsForValue().get(getDailyKey(userId))).orElse(0);
+    override fun getDailyPoint(userId: String): Int {
+        return redisTemplate.opsForValue()[getDailyKey(userId)] ?: 0
     }
 
-    @Override
-    public void updatePoint(String userId, Integer point) {
-        redisTemplate.opsForValue().set(getKey(userId), point, 1, TimeUnit.DAYS);
+    override fun updatePoint(userId: String, point: Int) {
+        redisTemplate.opsForValue().set(getKey(userId), point, 1, TimeUnit.DAYS)
     }
 
-    @Override
-    public void incrementPoint(String userId, Integer incrementValue) {
-        redisTemplate.opsForValue().increment(getKey(userId), incrementValue);
+    override fun incrementPoint(userId: String, incrementValue: Int) {
+        redisTemplate.opsForValue().increment(getKey(userId), incrementValue.toLong())
     }
 
-    @Override
-    public void incrementDailyPoint(String userId, Integer incrementValue) {
-        redisTemplate.opsForValue().increment(getDailyKey(userId), incrementValue);
+    override fun incrementDailyPoint(userId: String, incrementValue: Int) {
+        redisTemplate.opsForValue().increment(getDailyKey(userId), incrementValue.toLong())
     }
 
-    @Override
-    public void decrementPoint(String userId, Integer decrementValue) {
-        redisTemplate.opsForValue().decrement(getKey(userId), decrementValue);
+    override fun decrementPoint(userId: String, decrementValue: Int) {
+        redisTemplate.opsForValue().decrement(getKey(userId), decrementValue.toLong())
     }
 
-    @Override
-    public void flagUserForBackup(String userId) {
-        redisTemplate.opsForValue().set(BACKUP_FLAG_PREFIX + userId, 1);
+    override fun flagUserForBackup(userId: String) {
+        redisTemplate.opsForValue().set(PointConstants.BACKUP_FLAG_PREFIX + userId, 1)
     }
 
-    @Override
-    public void removeBackupFlag(String userId) {
-        redisTemplate.delete(BACKUP_FLAG_PREFIX + userId);
+    override fun removeBackupFlag(userId: String) {
+        redisTemplate.delete(PointConstants.BACKUP_FLAG_PREFIX + userId)
     }
 
-    @Override
-    public void resetDailyPoints() {
-        ScanOptions scanOptions = ScanOptions.scanOptions().match(DAILY_POINT_PREFIX + "*").build();
-
-        try (Cursor<String> cursor = redisTemplate.scan(scanOptions)) {
-            while (cursor.hasNext()) {
-                String key = cursor.next();
-                redisTemplate.delete(key);
+    override fun resetDailyPoints() {
+        val scanOptions = ScanOptions.scanOptions().match("${PointConstants.DAILY_POINT_PREFIX}*").build()
+        try {
+            redisTemplate.scan(scanOptions).use { cursor ->
+                cursor.forEach { key -> redisTemplate.delete(key) }
             }
-        } catch (Exception e) {
-            log.error("Error during Redis SCAN operation", e);
+        } catch (e: Exception) {
+            log.error("Error during Redis SCAN operation", e)
         }
     }
 
-    @Override
-    public Set<String> scanKeys(String pattern) {
-        Set<String> keys = new HashSet<>();
-        ScanOptions scanOptions = ScanOptions.scanOptions().match(pattern).build();
-
-        try (Cursor<String> cursor = redisTemplate.scan(scanOptions)) {
-            while (cursor.hasNext()) {
-                keys.add(cursor.next());
+    override fun scanKeys(pattern: String): Set<String> {
+        val keys = mutableSetOf<String>()
+        val scanOptions = ScanOptions.scanOptions().match(pattern).build()
+        try {
+            redisTemplate.scan(scanOptions).use { cursor ->
+                cursor.forEach { key -> keys.add(key) }
             }
-        } catch (Exception e) {
-            log.error("Error during Redis SCAN operation", e);
+        } catch (e: Exception) {
+            log.error("Error during Redis SCAN operation", e)
         }
-        return keys;
+        return keys
     }
 
-    @Override
-    public Set<String> getFlaggedUsers() {
-        return redisTemplate.keys(BACKUP_FLAG_PREFIX + "*");
+    override val flaggedUsers: Set<String>
+        get() = redisTemplate.keys("${PointConstants.BACKUP_FLAG_PREFIX}*") ?: emptySet()
+
+    private fun getKey(userId: String): String {
+        return "${PointConstants.POINT_PREFIX}$userId"
     }
 
-    private String getKey(String userId) {
-        return POINT_PREFIX + userId;
+    private fun getDailyKey(userId: String): String {
+        return "${PointConstants.DAILY_POINT_PREFIX}$userId"
     }
 
-    private String getDailyKey(String userId) {
-        return DAILY_POINT_PREFIX + userId;
+    companion object {
+        private val log: Logger = LoggerFactory.getLogger(PointRedisServiceImpl::class.java)
     }
 }

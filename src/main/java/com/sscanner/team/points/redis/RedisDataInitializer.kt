@@ -1,87 +1,87 @@
-package com.sscanner.team.points.redis;
+package com.sscanner.team.points.redis
 
-import com.sscanner.team.points.entity.UserPoint;
-import com.sscanner.team.points.repository.PointRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.stereotype.Component;
-
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-
-import static com.sscanner.team.points.common.PointConstants.POINT_PREFIX;
+import com.sscanner.team.points.common.PointConstants
+import com.sscanner.team.points.entity.UserPoint
+import com.sscanner.team.points.repository.PointRepository
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import org.springframework.boot.CommandLineRunner
+import org.springframework.data.domain.PageRequest
+import org.springframework.stereotype.Component
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 @Component
-@Slf4j
-@RequiredArgsConstructor
-public class RedisDataInitializer implements CommandLineRunner {
+class RedisDataInitializer(
+    private val pointRepository: PointRepository,
+    private val pointRedisService: PointRedisService
+) : CommandLineRunner {
+    private val executorService: ExecutorService = Executors.newFixedThreadPool(10)
 
-    private final PointRepository pointRepository;
-    private final PointRedisService pointRedisService;
-    private final ExecutorService executorService = Executors.newFixedThreadPool(10);
-
-    @Override
-    public void run(String... args) {
+    override fun run(vararg args: String) {
         // 비동기적으로 Redis 초기화 작업을 처리
-        executorService.submit(this::initializeRedisData);
+        executorService.submit { this.initializeRedisData() }
     }
 
-    private void initializeRedisData() {
+    private fun initializeRedisData() {
         try {
-            Set<String> keys = pointRedisService.scanKeys(POINT_PREFIX + "*");
+            val keys = pointRedisService.scanKeys(PointConstants.POINT_PREFIX + "*")
             if (keys.isEmpty()) {
-                processPagedData();
+                processPagedData()
             }
-        } catch (Exception e) {
-            log.error("Error during Redis data initialization", e);
+        } catch (e: Exception) {
+            log.error("Error during Redis data initialization", e)
         } finally {
-            shutdownExecutorService();
+            shutdownExecutorService()
         }
     }
 
-    private void processPagedData() {
-        int pageSize = 1000;  // 배치 크기 설정
-        int pageNumber = 0;
-        Page<UserPoint> userPoints = pointRepository.findAllWithUser(PageRequest.of(pageNumber, pageSize));
+    private fun processPagedData() {
+        val pageSize = 1000 // 배치 크기 설정
+        var pageNumber = 0
+        var userPoints = pointRepository.findAllWithUser(PageRequest.of(pageNumber, pageSize))
 
-        while (!userPoints.isEmpty()) {
-            List<UserPoint> userPointList = userPoints.getContent();
-            for (UserPoint userPoint : userPointList) {
-                processUserPointAsync(userPoint);
+        while (!userPoints.isEmpty) {
+            val userPointList = userPoints.content
+            for (userPoint in userPointList) {
+                if (userPoint != null) {
+                    processUserPointAsync(userPoint)
+                }
             }
 
-            pageNumber++;
-            userPoints = pointRepository.findAllWithUser(PageRequest.of(pageNumber, pageSize));
+            pageNumber++
+            userPoints = pointRepository.findAllWithUser(PageRequest.of(pageNumber, pageSize))
         }
     }
 
-    private void processUserPointAsync(UserPoint userPoint) {
-        executorService.submit(() -> {
+    private fun processUserPointAsync(userPoint: UserPoint) {
+        executorService.submit {
             try {
-                String userId = userPoint.getUser().getUserId();
-                Integer point = userPoint.getPoint();
-                pointRedisService.updatePoint(userId, point);
-            } catch (Exception e) {
-                log.error("Error updating Redis for userId {}", userPoint.getUser().getUserId(), e);
+                val userId = userPoint.user.userId
+                val point = userPoint.point
+                if (userId != null) {
+                    pointRedisService.updatePoint(userId, point)
+                }
+            } catch (e: Exception) {
+                log.error("Error updating Redis for userId {}", userPoint.user.userId, e)
             }
-        });
+        }
     }
 
-    private void shutdownExecutorService() {
-        executorService.shutdown();
+    private fun shutdownExecutorService() {
+        executorService.shutdown()
         try {
             if (!executorService.awaitTermination(60, TimeUnit.SECONDS)) {
-                executorService.shutdownNow();
+                executorService.shutdownNow()
             }
-        } catch (InterruptedException ex) {
-            log.error("Error shutting down ExecutorService", ex);
-            Thread.currentThread().interrupt();
+        } catch (ex: InterruptedException) {
+            log.error("Error shutting down ExecutorService", ex)
+            Thread.currentThread().interrupt()
         }
+    }
+
+    companion object {
+        private val log: Logger = LoggerFactory.getLogger(RedisDataInitializer::class.java)
     }
 }
