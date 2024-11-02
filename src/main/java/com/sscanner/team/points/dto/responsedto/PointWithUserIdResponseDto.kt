@@ -1,10 +1,12 @@
-package com.sscanner.team.points.dto.responsedto;
+package com.sscanner.team.points.dto.responsedto
 
-public record PointWithUserIdResponseDto(
-        String userId,
-        Integer point
+data class PointWithUserIdResponseDto(
+    val userId: String,
+    val point: Int
 ) {
-    public static PointWithUserIdResponseDto of(String userId, Integer point) {
-        return new PointWithUserIdResponseDto(userId, point);
+    companion object {
+        fun of(userId: String, point: Int): PointWithUserIdResponseDto {
+            return PointWithUserIdResponseDto(userId, point)
+        }
     }
 }
