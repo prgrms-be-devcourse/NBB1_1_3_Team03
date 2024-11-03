@@ -1,41 +1,44 @@
 package com.sscanner.team.user.responsedto
 
 import com.sscanner.team.user.entity.User
-import lombok.RequiredArgsConstructor
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
 
-@RequiredArgsConstructor
-class UserDetailsImpl : UserDetails {
-    private val user: User? = null
+class UserDetailsImpl(public val user: User) : UserDetails {
 
-    //롤 리턴
+    // 유저의 권한을 반환
     override fun getAuthorities(): Collection<GrantedAuthority> {
-        val authorities: MutableCollection<GrantedAuthority> = ArrayList()
-        authorities.add(GrantedAuthority { user.getAuthority() })
+        val authorities = mutableListOf<GrantedAuthority>()
+        authorities.add(GrantedAuthority { user.authority })
         return authorities
     }
 
+    // 유저의 비밀번호를 반환
     override fun getPassword(): String {
-        return user.getPassword()
+        return user.password
     }
 
+    // 유저의 이메일(사용자명)을 반환
     override fun getUsername(): String {
-        return user.getEmail()
+        return user.email
     }
 
+    // 계정이 만료되지 않았는지 확인 (항상 true)
     override fun isAccountNonExpired(): Boolean {
         return true
     }
 
+    // 계정이 잠겨 있지 않은지 확인 (항상 true)
     override fun isAccountNonLocked(): Boolean {
         return true
     }
 
+    // 자격 증명이 만료되지 않았는지 확인 (항상 true)
     override fun isCredentialsNonExpired(): Boolean {
         return true
     }
 
+    // 계정이 활성화되어 있는지 확인 (항상 true)
     override fun isEnabled(): Boolean {
         return true
     }

@@ -4,23 +4,21 @@ import com.sscanner.team.global.exception.BadRequestException
 import com.sscanner.team.global.exception.ExceptionCode
 import com.sscanner.team.user.repository.UserRepository
 import com.sscanner.team.user.responsedto.UserDetailsImpl
-import lombok.RequiredArgsConstructor
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.stereotype.Service
 
 @Service
-@RequiredArgsConstructor
-class CustomUserDetailsService : UserDetailsService {
-    private val userRepository: UserRepository? = null
+class CustomUserDetailsService (
+    private val userRepository: UserRepository
+) : UserDetailsService {
 
     @Throws(UsernameNotFoundException::class)
     override fun loadUserByUsername(email: String): UserDetails {
-        val user = userRepository!!.findByEmail(email)
-        if (user.isPresent) {
-            return UserDetailsImpl(user.get())
-        }
-        throw BadRequestException(ExceptionCode.USER_NOT_FOUND)
+        val user = userRepository.findByEmail(email)
+            .orElseThrow { BadRequestException(ExceptionCode.USER_NOT_FOUND) }
+
+        return UserDetailsImpl(user)
     }
 }
