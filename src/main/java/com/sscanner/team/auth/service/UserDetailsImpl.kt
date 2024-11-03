@@ -1,4 +1,4 @@
-package com.sscanner.team.user.responsedto
+package com.sscanner.team.auth.service
 
 import com.sscanner.team.user.entity.User
 import org.springframework.security.core.GrantedAuthority
