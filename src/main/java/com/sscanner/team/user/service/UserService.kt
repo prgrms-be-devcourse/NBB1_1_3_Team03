@@ -5,21 +5,21 @@ import com.sscanner.team.user.requestdto.*
 import com.sscanner.team.user.responsedto.*
 
 interface UserService {
-    fun join(req: UserJoinRequestDto?): UserJoinResponseDto?
+    fun join(req: UserJoinRequestDto): UserJoinResponseDto
 
-    val mypage: ApiResponse<UserMypageResponseDto?>?
+    fun getMypage(): ApiResponse<UserMypageResponseDto>
 
-    fun confirmPassword(password: String?): Boolean
+    fun confirmPassword(password: String): Boolean
 
-    fun updatePhoneNumber(req: UserPhoneUpdateRequestDto?): UserPhoneUpdateResponseDto?
+    fun updatePhoneNumber(req: UserPhoneUpdateRequestDto): UserPhoneUpdateResponseDto
 
-    fun updateNickname(newNickname: String?): UserNicknameUpdateResponseDto?
+    fun updateNickname(newNickname: String): UserNicknameUpdateResponseDto
 
-    fun changePassword(requestDto: UserPasswordChangeRequestDto?): String?
+    fun changePassword(requestDto: UserPasswordChangeRequestDto): String
 
     fun deleteUser()
 
-    fun findUserId(requestDto: UserFindIdRequestDto?): UserFindIdResponseDto?
+    fun findUserId(requestDto: UserFindIdRequestDto): UserFindIdResponseDto
 
-    fun resetPassword(requestDto: UserResetPasswordRequestDto?)
+    fun resetPassword(requestDto: UserResetPasswordRequestDto)
 }
