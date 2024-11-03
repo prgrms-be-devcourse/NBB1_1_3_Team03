@@ -1,11 +1,9 @@
-package com.sscanner.team.barcode.service;
+package com.sscanner.team.barcode.service
 
-import com.sscanner.team.barcode.entity.Barcode;
-import com.sscanner.team.barcode.responsedto.BarcodeResponseDto;
+import com.sscanner.team.barcode.entity.Barcode
+import com.sscanner.team.barcode.responsedto.BarcodeResponseDto
 
-import java.util.List;
-
-public interface BarcodeService {
-    Barcode createAndSaveBarcode(String userId, Long productId);
-    List<BarcodeResponseDto> findBarcodesByUserId(String userId);
+interface BarcodeService {
+    fun createAndSaveBarcode(userId: String, productId: Long): Barcode
+    fun findBarcodesByUserId(userId: String): List<BarcodeResponseDto>
 }

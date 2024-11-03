@@ -1,64 +1,50 @@
-package com.sscanner.team.barcode.service;
+package com.sscanner.team.barcode.service
 
-
-import com.sscanner.team.barcode.entity.Barcode;
-import com.sscanner.team.barcode.repository.BarcodeRepository;
-import com.sscanner.team.barcode.responsedto.BarcodeResponseDto;
-import com.sscanner.team.global.common.service.ImageService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-
-import static com.sscanner.team.barcode.common.BarcodeConstants.BARCODE_TEXT_TEMPLATE;
+import com.sscanner.team.barcode.common.BarcodeConstants
+import com.sscanner.team.barcode.entity.Barcode
+import com.sscanner.team.barcode.repository.BarcodeRepository
+import com.sscanner.team.barcode.responsedto.BarcodeResponseDto
+import com.sscanner.team.global.common.service.ImageService
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
-@RequiredArgsConstructor
-public class BarcodeServiceImpl implements BarcodeService {
+class BarcodeServiceImpl(
+    private val barcodeRepository: BarcodeRepository,
+    private val imageService: ImageService,
+    private val barcodeGenerator: BarcodeGenerator
+) : BarcodeService {
 
-    private final BarcodeRepository barcodeRepository;
-    private final ImageService imageService;
-    private final BarcodeGenerator barcodeGenerator;
-
-    @Override
     @Transactional
-    public Barcode createAndSaveBarcode(String userId, Long productId) {
-        String barcodeText = generateBarcodeText(userId, productId);
+    override fun createAndSaveBarcode(userId: String, productId: Long): Barcode {
+        val barcodeText = generateBarcodeText(userId, productId)
+        val barcodeImage = generateBarcodeImage(barcodeText)
+        val barcodeUrl = uploadBarcodeImage(barcodeImage)
 
-        String barcodeImage = generateBarcodeImage(barcodeText);
-
-        String barcodeUrl = uploadBarcodeImage(barcodeImage);
-
-        return saveBarcode(userId, productId, barcodeUrl);
+        return saveBarcode(userId, productId, barcodeUrl)
     }
 
-    @Override
-    public List<BarcodeResponseDto> findBarcodesByUserId(String userId) {
-        return barcodeRepository.findAllByUserId(userId).stream()
-                .map(BarcodeResponseDto::from)
-                .toList();
+    override fun findBarcodesByUserId(userId: String): List<BarcodeResponseDto> {
+        return barcodeRepository.findAllByUserId(userId)
+            .map { barcode -> BarcodeResponseDto.from(barcode) }
     }
 
-    private String uploadBarcodeImage(String barcodeImage) {
-        return imageService.uploadBarcodeToS3(barcodeImage);
+    private fun uploadBarcodeImage(barcodeImage: String): String {
+        return imageService.uploadBarcodeToS3(barcodeImage)
     }
 
-    private static String generateBarcodeText(String userId, Long productId) {
-        return String.format(BARCODE_TEXT_TEMPLATE, productId, userId);
+    private fun generateBarcodeImage(barcodeText: String): String {
+        return barcodeGenerator.generateBarcodeImage(barcodeText)
     }
 
-    private String generateBarcodeImage(String barcodeText) {
-        return barcodeGenerator.generateBarcodeImage(barcodeText);
+    private fun saveBarcode(userId: String, productId: Long, barcodeUrl: String): Barcode {
+        val barcode = Barcode.create(userId, productId, barcodeUrl)
+        return barcodeRepository.save(barcode)
     }
 
-    private Barcode saveBarcode(String userId, Long productId, String barcodeUrl) {
-        Barcode barcode = Barcode.builder()
-                .userId(userId)
-                .productId(productId)
-                .barcodeUrl(barcodeUrl)
-                .build();
-
-        return barcodeRepository.save(barcode);
+    companion object {
+        private fun generateBarcodeText(userId: String, productId: Long): String {
+            return String.format(BarcodeConstants.BARCODE_TEXT_TEMPLATE, productId, userId)
+        }
     }
 }
