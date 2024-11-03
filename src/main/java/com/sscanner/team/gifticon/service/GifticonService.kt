@@ -1,49 +1,42 @@
-package com.sscanner.team.gifticon.service;
+package com.sscanner.team.gifticon.service
 
-import com.sscanner.team.barcode.entity.Barcode;
-import com.sscanner.team.barcode.repository.BarcodeRepository;
-import com.sscanner.team.gifticon.responsedto.GifticonResponseDto;
-import com.sscanner.team.products.entity.Product;
-import com.sscanner.team.products.service.ProductImgService;
-import com.sscanner.team.products.service.ProductService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Map;
+import com.sscanner.team.barcode.entity.Barcode
+import com.sscanner.team.barcode.repository.BarcodeRepository
+import com.sscanner.team.gifticon.responsedto.GifticonResponseDto
+import com.sscanner.team.products.entity.Product
+import com.sscanner.team.products.service.ProductImgService
+import com.sscanner.team.products.service.ProductService
+import org.springframework.stereotype.Service
 
 @Service
-@RequiredArgsConstructor
-public class GifticonService {
+class GifticonService(
+    private val barcodeRepository: BarcodeRepository,
+    private val productService: ProductService,
+    private val productImgService: ProductImgService
+) {
+    fun getGifticonsByUserId(userId: String): List<GifticonResponseDto> {
+        val barcodes = barcodeRepository.findAllByUserId(userId)
 
-    private final BarcodeRepository barcodeRepository;
-    private final ProductService productService;
-    private final ProductImgService productImgService;
+        val productIds = barcodes.map { it.productId }
 
-    public List<GifticonResponseDto> getGifticonsByUserId(String userId) {
-        List<Barcode> barcodes = barcodeRepository.findAllByUserId(userId);
+        val products = productService.findProductsByIds(productIds)
+        val productImages = productImgService.findMainImageUrlsByProductIds(productIds)
 
-        List<Long> productIds = extractProductIds(barcodes);
-
-        Map<Long, Product> products = productService.findProductsByIds(productIds);
-        Map<Long, String> productImages = productImgService.findMainImageUrlsByProductIds(productIds);
-
-        return barcodes.stream()
-                .map(barcode -> toGifticonResponseDto(barcode, products, productImages))
-                .toList();
+        return barcodes.mapNotNull { barcode ->
+            toGifticonResponseDto(barcode, products, productImages)
+        }
     }
 
-    private List<Long> extractProductIds(List<Barcode> barcodes) {
-        return barcodes.stream()
-                .map(Barcode::getProductId)
-                .toList();
-    }
+    private fun toGifticonResponseDto(
+        barcode: Barcode,
+        products: Map<Long, Product>,
+        productImages: Map<Long, String>
+    ): GifticonResponseDto? {
+        val product = products[barcode.productId]
+        val representativeProductImgUrl = productImages[barcode.productId]
 
-    private GifticonResponseDto toGifticonResponseDto(Barcode barcode, Map<Long, Product> products, Map<Long, String> productImages) {
-        Product product = products.get(barcode.getProductId());
-        String representativeProductImgUrl = productImages.get(barcode.getProductId());
-
-        return GifticonResponseDto.of(product, representativeProductImgUrl, barcode.getBarcodeUrl());
+        return product?.let {
+            GifticonResponseDto.of(it, representativeProductImgUrl ?: "", barcode.barcodeUrl)
+        }
     }
 }
-
