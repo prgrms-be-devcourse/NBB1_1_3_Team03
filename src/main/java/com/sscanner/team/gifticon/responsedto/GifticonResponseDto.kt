@@ -1,17 +1,19 @@
-package com.sscanner.team.gifticon.responsedto;
+package com.sscanner.team.gifticon.responsedto
 
-import com.sscanner.team.products.entity.Product;
+import com.sscanner.team.products.entity.Product
 
-public record GifticonResponseDto(
-        String productName,
-        String productImageUrl,
-        String barcodeImageUrl
+data class GifticonResponseDto(
+    val productName: String,
+    val productImageUrl: String,
+    val barcodeImageUrl: String
 ) {
-    public static GifticonResponseDto of(Product product, String productImageUrl, String barcodeImageUrl) {
-        return new GifticonResponseDto(
-                product.getName(),
-                productImageUrl,
-                barcodeImageUrl
-        );
+    companion object {
+        fun of(product: Product, productImageUrl: String = "", barcodeImageUrl: String = ""): GifticonResponseDto {
+            return GifticonResponseDto(
+                product.name,
+                productImageUrl.ifEmpty { "defaultProductImageUrl" }, // 필요에 따라 기본 URL을 설정
+                barcodeImageUrl.ifEmpty { "defaultBarcodeImageUrl" } // 필요에 따라 기본 URL을 설정
+            )
+        }
     }
 }
