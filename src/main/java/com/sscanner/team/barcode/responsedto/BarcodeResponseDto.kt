@@ -1,17 +1,19 @@
-package com.sscanner.team.barcode.responsedto;
+package com.sscanner.team.barcode.responsedto
 
-import com.sscanner.team.barcode.entity.Barcode;
+import com.sscanner.team.barcode.entity.Barcode
 
-public record BarcodeResponseDto(
-        Long barcodeId,
-        String barcodeUrl,
-        Long productId
+data class BarcodeResponseDto(
+    val barcodeId: Long?,
+    val barcodeUrl: String,
+    val productId: Long
 ) {
-    public static BarcodeResponseDto from(Barcode barcode) {
-        return new BarcodeResponseDto(
-                barcode.getId(),
-                barcode.getBarcodeUrl(),
-                barcode.getProductId()
-        );
+    companion object {
+        fun from(barcode: Barcode): BarcodeResponseDto {
+            return BarcodeResponseDto(
+                barcode.id,
+                barcode.barcodeUrl,
+                barcode.productId
+            )
+        }
     }
 }
