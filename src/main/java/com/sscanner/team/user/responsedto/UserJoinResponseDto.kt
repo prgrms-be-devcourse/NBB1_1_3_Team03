@@ -2,7 +2,6 @@ package com.sscanner.team.user.responsedto
 
 import com.sscanner.team.user.entity.User
 
-@JvmRecord
 data class UserJoinResponseDto(
     val userId: String,
     val email: String,
@@ -12,10 +11,10 @@ data class UserJoinResponseDto(
     companion object {
         fun from(user: User): UserJoinResponseDto {
             return UserJoinResponseDto(
-                user.getUserId(),
-                user.email,
-                user.nickname,
-                user.phone
+                userId = user.userId ?: "",
+                email = user.email ?: "",
+                nickname = user.nickname ?: "",
+                phone = user.phone ?: ""
             )
         }
     }

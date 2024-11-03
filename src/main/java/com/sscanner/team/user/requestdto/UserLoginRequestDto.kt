@@ -1,9 +1,15 @@
 package com.sscanner.team.user.requestdto
 
-import jakarta.validation.constraints.Email
+import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonProperty
+import jakarta.validation.constraints.NotBlank
 
-@JvmRecord
-data class UserLoginRequestDto(
-    val email: @Email(message = "유효한 이메일 형식이 아닙니다.") String?,
+data class UserLoginRequestDto @JsonCreator constructor(
+    @JsonProperty("email")
+    @field:NotBlank(message = "이메일이 비어있습니다.")
+    val email: String,
+
+    @JsonProperty("password")
+    @field:NotBlank(message = "비밀번호가 비어있습니다.")
     val password: String
 )
