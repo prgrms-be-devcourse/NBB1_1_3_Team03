@@ -1,81 +1,74 @@
 package com.sscanner.team.global.configure
 
 import com.sscanner.team.auth.jwt.LoginFilter
+import com.sscanner.team.auth.jwt.CustomLogoutFilter
+import com.sscanner.team.auth.jwt.JWTFilter
+import com.sscanner.team.auth.jwt.JWTUtil
+import com.sscanner.team.auth.repository.RedisRefreshTokenRepository
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
+import org.springframework.security.authentication.AuthenticationManager
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration
+import org.springframework.security.config.annotation.web.builders.HttpSecurity
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
+import org.springframework.security.config.http.SessionCreationPolicy
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
+import org.springframework.security.web.SecurityFilterChain
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
+import org.springframework.security.web.authentication.logout.LogoutFilter
+import org.springframework.web.cors.CorsConfiguration
+import org.springframework.web.cors.CorsConfigurationSource
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 
-@org.springframework.context.annotation.Configuration
+@Configuration
 @EnableWebSecurity
-@RequiredArgsConstructor
-class SecurityConfig {
-    private val authenticationConfiguration: AuthenticationConfiguration? = null
-    private val jwtUtil: JWTUtil? = null
-    private val refreshRepository: RedisRefreshTokenRepository? = null
+class SecurityConfig(
+    private val authenticationConfiguration: AuthenticationConfiguration,
+    private val jwtUtil: JWTUtil,
+    private val refreshRepository: RedisRefreshTokenRepository
+) {
 
-    @org.springframework.context.annotation.Bean
-    fun passwordEncoder(): BCryptPasswordEncoder {
-        return BCryptPasswordEncoder()
-    }
+    @Bean
+    fun passwordEncoder(): BCryptPasswordEncoder = BCryptPasswordEncoder()
 
-    @org.springframework.context.annotation.Bean
-    @Throws(java.lang.Exception::class)
-    fun authenticationManager(config: AuthenticationConfiguration): AuthenticationManager {
-        return config.getAuthenticationManager()
-    }
+    @Bean
+    fun authenticationManager(config: AuthenticationConfiguration): AuthenticationManager =
+        config.authenticationManager
 
-    @org.springframework.context.annotation.Bean
-    @Throws(java.lang.Exception::class)
+    @Bean
     fun filterChain(http: HttpSecurity): SecurityFilterChain {
-        http.csrf(org.springframework.security.config.Customizer<CsrfConfigurer<HttpSecurity?>> { csrf: CsrfConfigurer<HttpSecurity?> -> csrf.disable() })
-        http.formLogin(org.springframework.security.config.Customizer<FormLoginConfigurer<HttpSecurity?>> { auth: FormLoginConfigurer<HttpSecurity?> -> auth.disable() })
-        http.httpBasic(org.springframework.security.config.Customizer<HttpBasicConfigurer<HttpSecurity?>> { auth: HttpBasicConfigurer<HttpSecurity?> -> auth.disable() })
-
-        http.sessionManagement(org.springframework.security.config.Customizer<SessionManagementConfigurer<HttpSecurity?>> { session: SessionManagementConfigurer<HttpSecurity?> ->
-            session.sessionCreationPolicy(
-                SessionCreationPolicy.STATELESS
-            )
-        })
-        // 경로별 인가
-        http.authorizeHttpRequests(org.springframework.security.config.Customizer<AuthorizationManagerRequestMatcherRegistry> { authorize: AuthorizationManagerRequestMatcherRegistry ->
-            authorize.requestMatchers(
-                "/login",
-                "/",
-                "health",
-                "api/users/join",
-                "/sms/**",
-                "/api/users/reset-password",
-                "/api/users/find-id",
-                "/reissue"
-            ).permitAll()
-                .requestMatchers("/api/admin/boards/**").hasAuthority("ADMIN")
-                .anyRequest().authenticated()
-        }
-        )
+        http.csrf { it.disable() }
+            .formLogin { it.disable() }
+            .httpBasic { it.disable() }
+            .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
+            .authorizeHttpRequests {
+                it.requestMatchers("/login", "/", "health", "api/users/join", "/sms/**", "/api/users/reset-password", "/api/users/find-id", "/reissue")
+                    .permitAll()
+                    .requestMatchers("/api/admin/boards/**").hasAuthority("ADMIN")
+                    .anyRequest().authenticated()
+            }
 
         configureFilters(http)
-
         return http.build()
     }
 
-    @org.springframework.context.annotation.Bean
-    fun corsConfigurationSource(): org.springframework.web.cors.CorsConfigurationSource {
-        val configuration: CorsConfiguration = CorsConfiguration()
+    @Bean
+    fun corsConfigurationSource(): CorsConfigurationSource {
+        val configuration = CorsConfiguration()
+        configuration.allowedOriginPatterns = listOf("http://localhost:*", "http://10.0.2.2:*")
+        configuration.allowedMethods = listOf("GET", "POST", "PUT", "DELETE")
+        configuration.allowedHeaders = listOf("*")
+        configuration.allowCredentials = true
 
-        configuration.setAllowedOriginPatterns(mutableListOf("http://localhost:*", "http://10.0.2.2:*"))
-
-        configuration.setAllowedMethods(mutableListOf("GET", "POST", "PUT", "DELETE"))
-        configuration.setAllowedHeaders(listOf("*"))
-        configuration.setAllowCredentials(true)
-
-        val source = org.springframework.web.cors.UrlBasedCorsConfigurationSource()
+        val source = UrlBasedCorsConfigurationSource()
         source.registerCorsConfiguration("/**", configuration)
         return source
     }
 
-    @Throws(java.lang.Exception::class)
     private fun configureFilters(http: HttpSecurity) {
-        val jwtFilter: JWTFilter = JWTFilter(jwtUtil)
-        val loginFilter: LoginFilter =
-            LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, refreshRepository)
-        val logoutFilter: CustomLogoutFilter = CustomLogoutFilter(jwtUtil, refreshRepository)
+        val jwtFilter = JWTFilter(jwtUtil)
+        val loginFilter = LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, refreshRepository)
+        val logoutFilter = CustomLogoutFilter(jwtUtil, refreshRepository)
 
         http.addFilterAfter(jwtFilter, LoginFilter::class.java)
             .addFilterAt(loginFilter, UsernamePasswordAuthenticationFilter::class.java)
