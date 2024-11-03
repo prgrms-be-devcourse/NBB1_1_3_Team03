@@ -19,7 +19,7 @@ class Product(
 ) : BaseEntity() {
 
     // JPA에서 사용할 기본 생성자
-    protected constructor() : this(name = "", price = 0)
+    constructor() : this(id = null, name = "", price = 0)
 
     companion object {
         fun create(id: Long? = null, name: String, price: Int): Product {
