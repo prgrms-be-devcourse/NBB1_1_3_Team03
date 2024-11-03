@@ -5,7 +5,7 @@ import com.sscanner.team.trashcan.requestDto.UpdateTrashcanRequestDto
 import com.sscanner.team.trashcan.type.TrashCategory
 import com.sscanner.team.trashcan.type.TrashcanStatus
 import jakarta.persistence.*
-import org.hibernate.annotations.SQLDelete
+import jakarta.validation.Valid
 import org.hibernate.annotations.SQLRestriction
 import java.math.BigDecimal
 
@@ -65,8 +65,8 @@ class Trashcan : BaseEntity {
 
     protected constructor()
 
-    fun updateInfo(requestDto: UpdateTrashcanRequestDto) {
-        this.latitude = requestDto.latitude
+    fun updateInfo(requestDto: @Valid UpdateTrashcanRequestDto?) {
+        this.latitude = requestDto!!.latitude
         this.longitude = requestDto.longitude
         this.roadNameAddress = requestDto.roadNameAddress
         this.detailedAddress = requestDto.detailedAddress

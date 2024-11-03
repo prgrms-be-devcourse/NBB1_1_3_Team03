@@ -1,7 +1,7 @@
-package com.sscanner.team.trashcan.type;
+package com.sscanner.team.trashcan.type
 
 
-public enum TrashCategory {
+enum class TrashCategory {
     NORMAL,
     CIGARETTE
 }

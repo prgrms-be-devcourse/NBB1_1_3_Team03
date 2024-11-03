@@ -1,6 +1,6 @@
-package com.sscanner.team.trashcan.type;
+package com.sscanner.team.trashcan.type
 
-public enum TrashcanStatus {
+enum class TrashcanStatus {
     EMPTY,
     INTERMEDIATE,
     FULL
