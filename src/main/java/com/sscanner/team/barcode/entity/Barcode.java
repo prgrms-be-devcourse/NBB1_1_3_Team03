@@ -4,10 +4,8 @@ import com.sscanner.team.global.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Getter
 @Entity
 @Table(name = "barcode")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -31,5 +29,21 @@ public class Barcode extends BaseEntity {
         this.userId = userId;
         this.productId = productId;
         this.barcodeUrl = barcodeUrl;
+    }
+
+    public Long getId() {
+        return this.id;
+    }
+
+    public String getUserId() {
+        return this.userId;
+    }
+
+    public Long getProductId() {
+        return this.productId;
+    }
+
+    public String getBarcodeUrl() {
+        return this.barcodeUrl;
     }
 }
