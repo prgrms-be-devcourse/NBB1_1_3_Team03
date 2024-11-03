@@ -1,6 +1,7 @@
 package com.sscanner.team.auth.jwt
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.sscanner.team.auth.constant.JwtConstants
 import com.sscanner.team.auth.repository.RedisRefreshTokenRepository
 import com.sscanner.team.user.requestdto.UserLoginRequestDto
 import jakarta.servlet.FilterChain
@@ -44,10 +45,10 @@ class LoginFilter(
     ) {
         val email = authentication.name
         val authority = authentication.authorities.first().authority
-        val access = jwtUtil.createJwt("access", email, authority, 2000000L)
-        val refresh = jwtUtil.createJwt("refresh", email, authority, 86400000L)
+        val access = jwtUtil.createJwt("access", email, authority, JwtConstants.ACCESS_TOKEN_EXPIRATION)
+        val refresh = jwtUtil.createJwt("refresh", email, authority, JwtConstants.REFRESH_TOKEN_EXPIRATION)
 
-        refreshRepository.save(email, refresh, 86400000L)
+        refreshRepository.save(email, refresh, JwtConstants.REFRESH_TOKEN_EXPIRATION)
         SecurityContextHolder.getContext().authentication =
             UsernamePasswordAuthenticationToken(email, null, authentication.authorities)
 
