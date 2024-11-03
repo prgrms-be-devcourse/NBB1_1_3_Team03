@@ -42,8 +42,8 @@ public class SmsServiceImpl implements SmsService {
 
     @Override
     public boolean verifyCode(SmsVerifyRequestDto smsVerifyDto) {
-        if (isVerify(smsVerifyDto.phoneNum(), smsVerifyDto.code())) {
-            smsRepository.deleteSmsCertification(smsVerifyDto.phoneNum());
+        if (isVerify(smsVerifyDto.phoneNum, smsVerifyDto.code)) {
+            smsRepository.deleteSmsCertification(smsVerifyDto.phoneNum);
             return true;
         } else {
             return false;
