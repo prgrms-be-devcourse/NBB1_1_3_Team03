@@ -23,7 +23,7 @@ public class SmsServiceImpl implements SmsService {
 
     @Override
     public void sendSms(SmsRequestDto smsRequestDto) {
-        String phoneNum = smsRequestDto.phoneNum();
+        String phoneNum = smsRequestDto.phoneNum;
 
         if (userRepository.findByPhone(phoneNum).isPresent()) {
             throw new BadRequestException(ExceptionCode.DUPLICATED_PHONE);
