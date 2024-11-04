@@ -1,30 +1,36 @@
-package com.sscanner.team.admin.responsedto;
+package com.sscanner.team.admin.responsedto
 
-import com.sscanner.team.board.entity.Board;
-import com.sscanner.team.board.entity.BoardImg;
-import com.sscanner.team.board.responsedto.BoardImgResponseDTO;
-import com.sscanner.team.board.type.BoardCategory;
-import com.sscanner.team.trashcan.type.TrashCategory;
-import com.sscanner.team.trashcan.type.TrashcanStatus;
+import com.sscanner.team.board.entity.Board
+import com.sscanner.team.board.entity.BoardImg
+import com.sscanner.team.board.responsedto.BoardImgResponseDTO
+import com.sscanner.team.board.responsedto.BoardImgResponseDTO.Companion.from
+import com.sscanner.team.board.type.BoardCategory
+import com.sscanner.team.trashcan.type.TrashCategory
+import com.sscanner.team.trashcan.type.TrashcanStatus
 
-import java.util.List;
-
-public record AdminEctBoardResponseDTO(
-        BoardCategory boardCategory,
-        TrashCategory trashCategory,
-        List<BoardImgResponseDTO> images,
-        TrashcanStatus trashcanStatus,
-        String significant
+@JvmRecord
+data class AdminEctBoardResponseDTO(
+    val boardCategory: BoardCategory,
+    val trashCategory: TrashCategory,
+    val images: List<BoardImgResponseDTO>,
+    val trashcanStatus: TrashcanStatus,
+    val significant: String
 ) {
-    public static AdminEctBoardResponseDTO of(Board board, List<BoardImg> boardImgs) {
-        return new AdminEctBoardResponseDTO(
-                board.getBoardCategory(),
-                board.getTrashCategory(),
+    companion object {
+        fun of(board: Board, boardImgs: List<BoardImg?>): AdminEctBoardResponseDTO {
+            return AdminEctBoardResponseDTO(
+                board.boardCategory,
+                board.trashCategory,
                 boardImgs.stream()
-                        .map(boardImg -> BoardImgResponseDTO.from(boardImg))
-                        .toList(),
-                board.getUpdatedTrashcanStatus(),
-                board.getSignificant()
-        );
+                    .map { boardImg: BoardImg? ->
+                        from(
+                            boardImg!!
+                        )
+                    }
+                    .toList(),
+                board.updatedTrashcanStatus,
+                board.significant
+            )
+        }
     }
 }
