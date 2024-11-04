@@ -35,10 +35,10 @@ class UserController(
 
     // 비밀번호 확인 (폰번호 수정 전 현재 비밀번호 확인 후 접근 가능)
     @PostMapping("/confirm-password")
-    fun confirmPassword(@RequestBody password: String): ApiResponse<Void> {
+    fun confirmPassword(@RequestBody password: String): ApiResponse<Any> {
         val isConfirmed = userServiceImpl.confirmPassword(password)
         if (isConfirmed) {
-            return ApiResponse.ok(200, null, "비밀번호 확인 성공")
+            return ApiResponse.ok(200,"비밀번호 확인 성공")
         } else throw BadRequestException(ExceptionCode.CURRENT_PASSWORD_NOT_MATCH)
     }
 
@@ -58,9 +58,9 @@ class UserController(
 
     // 회원 탈퇴
     @DeleteMapping("/delete")
-    fun deleteUser(): ApiResponse<Void> {
+    fun deleteUser(): ApiResponse<Any> {
         userServiceImpl.deleteUser()
-        return ApiResponse.ok(200, null, "회원 탈퇴 성공")
+        return ApiResponse.ok(200, "회원 탈퇴 성공")
     }
 
     // 아이디 찾기
@@ -72,8 +72,8 @@ class UserController(
 
     // 비밀번호 찾기
     @PostMapping("/reset-password")
-    fun resetPassword(@RequestBody @Valid requestDto: UserResetPasswordRequestDto): ApiResponse<Void> {
+    fun resetPassword(@RequestBody @Valid requestDto: UserResetPasswordRequestDto): ApiResponse<Any> {
         userServiceImpl.resetPassword(requestDto)
-        return ApiResponse.ok(200, null, "비밀번호가 성공적으로 변경되었습니다.")
+        return ApiResponse.ok(200,  "비밀번호가 성공적으로 변경되었습니다.")
     }
 }
