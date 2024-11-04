@@ -1,43 +1,40 @@
-package com.sscanner.team.board.service;
+package com.sscanner.team.board.service
 
-import com.sscanner.team.admin.responsedto.AdminBoardInfoResponseDTO;
-import com.sscanner.team.user.entity.User;
-import com.sscanner.team.board.entity.Board;
-import com.sscanner.team.board.entity.BoardImg;
-import com.sscanner.team.board.repository.BoardRepository;
-import com.sscanner.team.board.requestdto.BoardCreateRequestDTO;
-import com.sscanner.team.board.requestdto.BoardUpdateRequestDTO;
-import com.sscanner.team.board.responsedto.BoardInfoResponseDTO;
-import com.sscanner.team.board.responsedto.BoardListResponseDTO;
-import com.sscanner.team.board.responsedto.BoardLocationInfoResponseDTO;
-import com.sscanner.team.board.responsedto.BoardResponseDTO;
-import com.sscanner.team.board.type.ApprovalStatus;
-import com.sscanner.team.board.type.BoardCategory;
-import com.sscanner.team.global.exception.BadRequestException;
-import com.sscanner.team.global.utils.UserUtils;
-import com.sscanner.team.trashcan.type.TrashCategory;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
-
-import static com.sscanner.team.global.exception.ExceptionCode.*;
+import com.sscanner.team.admin.responsedto.AdminBoardInfoResponseDTO
+import com.sscanner.team.board.entity.Board
+import com.sscanner.team.board.entity.BoardImg
+import com.sscanner.team.board.repository.BoardRepository
+import com.sscanner.team.board.requestdto.BoardCreateRequestDTO
+import com.sscanner.team.board.requestdto.BoardUpdateRequestDTO
+import com.sscanner.team.board.responsedto.BoardInfoResponseDTO
+import com.sscanner.team.board.responsedto.BoardListResponseDTO
+import com.sscanner.team.board.responsedto.BoardLocationInfoResponseDTO
+import com.sscanner.team.board.responsedto.BoardResponseDTO
+import com.sscanner.team.board.type.ApprovalStatus
+import com.sscanner.team.board.type.BoardCategory
+import com.sscanner.team.global.exception.BadRequestException
+import com.sscanner.team.global.exception.ExceptionCode
+import com.sscanner.team.global.utils.UserUtils
+import com.sscanner.team.trashcan.type.TrashCategory
+import com.sscanner.team.user.entity.User
+import lombok.RequiredArgsConstructor
+import lombok.extern.slf4j.Slf4j
+import org.hibernate.query.sqm.tree.SqmNode.log
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+import org.springframework.web.multipart.MultipartFile
 
 @Service
-@RequiredArgsConstructor
 @Transactional(readOnly = true)
 @Slf4j
-public class BoardServiceImpl implements BoardService{
-
-    private final BoardRepository boardRepository;
-    private final BoardImgService boardImgService;
-    private final UserUtils userUtils;
+class BoardServiceImpl (
+    private val boardRepository: BoardRepository,
+    private val boardImgService: BoardImgService,
+    private val userUtils: UserUtils
+): BoardService {
 
     /**
      * 추가, 수정, 삭제 신고 게시글 등록
@@ -46,18 +43,17 @@ public class BoardServiceImpl implements BoardService{
      * @return BoardCreateResponseDTO - 신고 게시글 관련 정보
      */
     @Transactional
-    @Override
-    public BoardResponseDTO createBoard(BoardCreateRequestDTO boardCreateRequestDTO,
-                                        List<MultipartFile> files) {
-        User user = userUtils.getUser();
+    override fun createBoard(
+        boardCreateRequestDTO: BoardCreateRequestDTO,
+        files: List<MultipartFile>
+    ): BoardResponseDTO {
+        val user = userUtils.user
+        val board = boardCreateRequestDTO.toEntityBoard(user)
 
-        Board board = boardCreateRequestDTO.toEntityBoard(user);
+        val savedBoard = boardRepository.save(board)
+        val boardImgs = boardImgService.saveBoardImg(savedBoard.id!!, files)
 
-        Board savedBoard = boardRepository.save(board);
-
-        List<BoardImg> boardImgs = boardImgService.saveBoardImg(savedBoard.getId(), files);
-
-        return BoardResponseDTO.of(savedBoard, boardImgs);
+        return BoardResponseDTO.of(savedBoard, boardImgs)
     }
 
     /**
@@ -65,15 +61,14 @@ public class BoardServiceImpl implements BoardService{
      * @param boardId - 게시글 id
      */
     @Transactional
-    @Override
-    public void deleteBoard(Long boardId) {
-        User user = userUtils.getUser();
-        Board board = getBoard(boardId);
+    override fun deleteBoard(boardId: Long) {
+        val user = userUtils.user
+        val board = getBoard(boardId)
 
-        isMatchAuthor(user, board);
+        isMatchAuthor(user, board)
 
-        boardRepository.delete(board);
-        boardImgService.deleteBoardImgs(boardId);
+        boardRepository.delete(board)
+        boardImgService.deleteBoardImgs(boardId)
     }
 
     /**
@@ -84,20 +79,20 @@ public class BoardServiceImpl implements BoardService{
      * @return BoardResponseDTO
      */
     @Transactional
-    @Override
-    public BoardResponseDTO updateBoard(Long boardId,
-                                           BoardUpdateRequestDTO boardUpdateRequestDTO,
-                                           List<MultipartFile> files) {
-        User user = userUtils.getUser();
-        Board board = getBoard(boardId);
+    override fun updateBoard(
+        boardId: Long,
+        boardUpdateRequestDTO: BoardUpdateRequestDTO,
+        files: List<MultipartFile>
+    ): BoardResponseDTO {
+        val user = userUtils.user
+        val board = getBoard(boardId)
 
-        isMatchAuthor(user, board);
+        isMatchAuthor(user, board)
 
-        board.updateBoardInfo(boardUpdateRequestDTO);
+        board.updateBoardInfo(boardUpdateRequestDTO)
+        val boardImgs = getUpdatedImages(files, boardId)
 
-        List<BoardImg> boardImgs = getUpdatedImages(files, boardId);
-
-        return BoardResponseDTO.of(board, boardImgs);
+        return BoardResponseDTO.of(board, boardImgs)
     }
 
     /**
@@ -107,20 +102,21 @@ public class BoardServiceImpl implements BoardService{
      * @param page - 페이지
      * @param size - 한 페이지에 데이터 수
      * @return Page<BoardListResponseDTO>
-     */
-    @Override
-    public BoardListResponseDTO getBoardList(BoardCategory boardCategory, TrashCategory trashCategory,
-                                                Integer page, Integer size) {
-        PageRequest pageRequest = PageRequest.of(page, size, Sort.Direction.DESC, "updatedAt");
+    </BoardListResponseDTO> */
+    override fun getBoardList(
+        boardCategory: BoardCategory, trashCategory: TrashCategory,
+        page: Int, size: Int
+    ): BoardListResponseDTO {
+        val pageRequest = PageRequest.of(page, size, Sort.Direction.DESC, "updatedAt")
 
-        Page<Board> boards = boardRepository.findAllByCategories(boardCategory, trashCategory, pageRequest);
+        val boards = boardRepository.findAllByCategories(boardCategory, trashCategory, pageRequest)
 
-        Page<BoardInfoResponseDTO> boardInfos = boards.map(board -> {
-            List<BoardImg> boardImgs = boardImgService.getBoardImgs(board.getId());
-            return BoardInfoResponseDTO.of(board, boardImgs.get(0).getBoardImgUrl());
-        });
+        val boardInfos = boards.map { board: Board ->
+            val boardImgs = boardImgService.getBoardImgs(board.id!!)
+            BoardInfoResponseDTO.of(board, boardImgs[0].boardImgUrl)
+        }
 
-        return BoardListResponseDTO.from(boardCategory, trashCategory, boardInfos);
+        return BoardListResponseDTO.from(boardCategory, trashCategory, boardInfos)
     }
 
     /**
@@ -128,13 +124,12 @@ public class BoardServiceImpl implements BoardService{
      * @param boardId - 게시글 id
      * @return BoardResponseDTO
      */
-    @Override
-    public BoardResponseDTO getBoardDetailed(Long boardId) {
-        Board board = getBoard(boardId);
+    override fun getBoardDetailed(boardId: Long): BoardResponseDTO {
+        val board = getBoard(boardId)
 
-        List<BoardImg> boardImgs = boardImgService.getBoardImgs(boardId);
+        val boardImgs = boardImgService.getBoardImgs(boardId)
 
-        return BoardResponseDTO.of(board, boardImgs);
+        return BoardResponseDTO.of(board, boardImgs)
     }
 
     /**
@@ -142,45 +137,48 @@ public class BoardServiceImpl implements BoardService{
      * @param boardId - 게시글 id
      * @return BoardLocationInfoResponseDTO 위치 정보
      */
-    @Override
-    public BoardLocationInfoResponseDTO getBoardLocationInfo(Long boardId) {
-        Board board = getBoard(boardId);
+    override fun getBoardLocationInfo(boardId: Long): BoardLocationInfoResponseDTO {
+        val board = getBoard(boardId)
 
-        return BoardLocationInfoResponseDTO.from(board);
+        return BoardLocationInfoResponseDTO.from(board)
     }
 
-    @Override
-    public Board getBoard(Long boardId) {
-        return boardRepository
-                .findById(boardId)
-                .orElseThrow(() -> new BadRequestException(NOT_EXIST_BOARD));
+    override fun getBoard(boardId: Long): Board {
+        return boardRepository.findById(boardId)
+            .orElseThrow {BadRequestException(ExceptionCode.NOT_EXIST_BOARD)}
     }
 
-    @Override
-    public Page<AdminBoardInfoResponseDTO> getBoardsForAdmin(ApprovalStatus approvalStatus, TrashCategory trashCategory,
-                                                      BoardCategory boardCategory, Integer page, Integer size) {
-        PageRequest pageRequest = PageRequest.of(page, size, Sort.Direction.DESC, "updatedAt");
+    override fun getBoardsForAdmin(
+        approvalStatus: ApprovalStatus, trashCategory: TrashCategory,
+        boardCategory: BoardCategory, page: Int, size: Int
+    ): Page<AdminBoardInfoResponseDTO> {
+        val pageRequest = PageRequest.of(page!!, size!!, Sort.Direction.DESC, "updatedAt")
 
-        Page<Board> boards =
-                boardRepository.findAllByStatusAndCategories(approvalStatus, boardCategory, trashCategory, pageRequest);
+        val boards =
+            boardRepository.findAllByStatusAndCategories(
+                approvalStatus,
+                boardCategory,
+                trashCategory,
+                pageRequest
+            )
 
-        return boards.map(board -> {
-            List<BoardImg> boardImgs = boardImgService.getBoardImgs(board.getId());
-            return AdminBoardInfoResponseDTO.of(board, boardImgs.get(0).getBoardImgUrl());
-        });
-    }
-
-    private void isMatchAuthor(User user, Board board) {
-        if(!board.getUser().equals(user)) {
-            throw new BadRequestException(MISMATCH_AUTHOR);
+        return boards.map { board: Board ->
+            val boardImgs = boardImgService.getBoardImgs(board.id!!)
+            AdminBoardInfoResponseDTO.of(board, boardImgs[0].boardImgUrl)
         }
     }
 
-    private List<BoardImg> getUpdatedImages(List<MultipartFile> files, Long boardId) {
-        if(files.get(0).isEmpty()) {
-            return boardImgService.getBoardImgs(boardId);
+    private fun isMatchAuthor(user: User, board: Board) {
+        if (board.user != user) {
+            throw BadRequestException(ExceptionCode.MISMATCH_AUTHOR)
+        }
+    }
+
+    private fun getUpdatedImages(files: List<MultipartFile>, boardId: Long): List<BoardImg> {
+        return if (files[0].isEmpty) {
+            boardImgService.getBoardImgs(boardId)
         } else {
-            return boardImgService.updateBoardImgs(boardId, files);
+            boardImgService!!.updateBoardImgs(boardId, files)
         }
     }
 }
