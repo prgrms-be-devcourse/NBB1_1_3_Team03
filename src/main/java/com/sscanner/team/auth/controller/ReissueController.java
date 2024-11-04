@@ -1,7 +1,7 @@
 package com.sscanner.team.auth.controller;
 
 import com.sscanner.team.global.common.response.ApiResponse;
-import com.sscanner.team.user.responsedto.RefreshResponseDto;
+import com.sscanner.team.auth.responsedto.RefreshResponseDto;
 import com.sscanner.team.auth.service.ReissueServiceImpl;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

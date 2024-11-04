@@ -6,7 +6,7 @@ import com.sscanner.team.global.exception.BadRequestException;
 import com.sscanner.team.global.exception.ExceptionCode;
 import com.sscanner.team.auth.jwt.JWTUtil;
 import com.sscanner.team.auth.repository.RedisRefreshTokenRepository;
-import com.sscanner.team.user.responsedto.RefreshResponseDto;
+import com.sscanner.team.auth.responsedto.RefreshResponseDto;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;

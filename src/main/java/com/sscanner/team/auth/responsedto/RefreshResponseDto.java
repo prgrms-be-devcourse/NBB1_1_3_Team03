@@ -1,4 +1,4 @@
-package com.sscanner.team.user.responsedto;
+package com.sscanner.team.auth.responsedto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
