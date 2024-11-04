@@ -1,70 +1,57 @@
-package com.sscanner.team.board.service;
+package com.sscanner.team.board.service
 
-import com.sscanner.team.board.entity.BoardImg;
-import com.sscanner.team.board.repository.BoardImgRepository;
-import com.sscanner.team.global.common.service.ImageService;
-import com.sscanner.team.global.exception.BadRequestException;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static com.sscanner.team.global.exception.ExceptionCode.*;
-
+import com.sscanner.team.board.entity.BoardImg
+import com.sscanner.team.board.repository.BoardImgRepository
+import com.sscanner.team.global.common.service.ImageService
+import com.sscanner.team.global.exception.BadRequestException
+import com.sscanner.team.global.exception.ExceptionCode
+import lombok.RequiredArgsConstructor
+import lombok.extern.slf4j.Slf4j
+import org.springframework.stereotype.Service
+import org.springframework.web.multipart.MultipartFile
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
-public class BoardImgServiceImpl implements BoardImgService{
+class BoardImgServiceImpl (
+    private val boardImgRepository: BoardImgRepository,
+    private val imageService: ImageService
+): BoardImgService {
 
-    private final BoardImgRepository boardImgRepository;
-    private final ImageService imageService;
+    override fun saveBoardImg(boardId: Long, files: List<MultipartFile>): List<BoardImg> {
+        val boardImgs: MutableList<BoardImg> = ArrayList()
+        for (file in files) {
+            val boardImgUrl = imageService.makeImgUrl(file)
+            val boardImg: BoardImg = BoardImg.create(boardId, boardImgUrl)
+            boardImgs.add(boardImg)
+        }
+        return boardImgRepository.saveAll(boardImgs)
+    }
 
-    @Override
-    public List<BoardImg> saveBoardImg(Long boardId, List<MultipartFile> files) {
-        List<BoardImg> boardImgs = new ArrayList<>();
-        for(MultipartFile file : files) {
-            String boardImgUrl = imageService.makeImgUrl(file);
+    override fun deleteBoardImgs(boardId: Long) {
+        val boardImgs = getBoardImgs(boardId)
 
-            BoardImg boardImg = BoardImg.makeBoardImg(boardId, boardImgUrl);
+        boardImgRepository.deleteAll(boardImgs)
+    }
 
-            boardImgs.add(boardImg);
+    override fun updateBoardImgs(boardId: Long, files: List<MultipartFile>): List<BoardImg> {
+        deleteBoardImgs(boardId)
+
+        return saveBoardImg(boardId, files)
+    }
+
+    override fun getBoardImgs(boardId: Long): List<BoardImg> {
+        val boardImgs: List<BoardImg> = boardImgRepository.findAllByBoardId(boardId)
+        if (boardImgs.isEmpty()) {
+            throw BadRequestException(ExceptionCode.NOT_EXIST_BOARD_IMG)
         }
 
-        return boardImgRepository.saveAll(boardImgs);
+        return boardImgs
     }
 
-    @Override
-    public void deleteBoardImgs(Long boardId) {
-        List<BoardImg> boardImgs = getBoardImgs(boardId);
-
-        boardImgRepository.deleteAll(boardId);
-    }
-
-    @Override
-    public List<BoardImg> updateBoardImgs(Long boardId, List<MultipartFile> files) {
-        deleteBoardImgs(boardId);
-
-        return saveBoardImg(boardId, files);
-    }
-
-    @Override
-    public List<BoardImg> getBoardImgs(Long boardId) {
-        List<BoardImg> boardImgs = boardImgRepository.findAllByBoardId(boardId);
-        if(boardImgs.isEmpty()) {
-            throw new BadRequestException(NOT_EXIST_BOARD_IMG);
-        }
-
-        return boardImgs;
-    }
-
-    public void checkExistImgUrl(Long boardId, String chosenImgUrl) {
-        boolean isExist = boardImgRepository.existsByBoardIdAndAndBoardImgUrl(boardId, chosenImgUrl);
-        if(!isExist) {
-            throw new BadRequestException(NOT_EXIST_BOARD_IMG);
+    override fun checkExistImgUrl(boardId: Long, chosenImgUrl: String) {
+        val isExist = boardImgRepository.existsByBoardIdAndAndBoardImgUrl(boardId, chosenImgUrl)
+        if (!isExist) {
+            throw BadRequestException(ExceptionCode.NOT_EXIST_BOARD_IMG)
         }
     }
 }

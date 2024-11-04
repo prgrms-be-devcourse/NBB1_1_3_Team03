@@ -1,14 +1,12 @@
-package com.sscanner.team.board.service;
+package com.sscanner.team.board.service
 
-import com.sscanner.team.board.entity.BoardImg;
-import org.springframework.web.multipart.MultipartFile;
+import com.sscanner.team.board.entity.BoardImg
+import org.springframework.web.multipart.MultipartFile
 
-import java.util.List;
-
-public interface BoardImgService {
-    List<BoardImg> saveBoardImg(Long boardId, List<MultipartFile> files);
-    void deleteBoardImgs(Long boardId);
-    List<BoardImg> updateBoardImgs(Long boardId, List<MultipartFile> files);
-    List<BoardImg> getBoardImgs(Long boardId);
-    void checkExistImgUrl(Long boardId, String chosenImgUrl);
+interface BoardImgService {
+    fun saveBoardImg(boardId: Long, files: List<MultipartFile>): List<BoardImg>
+    fun deleteBoardImgs(boardId: Long)
+    fun updateBoardImgs(boardId: Long, files: List<MultipartFile>): List<BoardImg>
+    fun getBoardImgs(boardId: Long): List<BoardImg>
+    fun checkExistImgUrl(boardId: Long, chosenImgUrl: String)
 }
