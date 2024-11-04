@@ -94,6 +94,10 @@ dependencies {
     // Nurigo 문자 인증
     implementation("net.nurigo:sdk:4.3.0")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+
+    // 모니터링
+    implementation ("org.springframework.boot:spring-boot-starter-actuator")
+    implementation ("io.micrometer:micrometer-registry-prometheus")
 }
 
 tasks.named<Test>("test") {
