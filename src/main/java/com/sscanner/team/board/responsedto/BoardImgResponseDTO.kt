@@ -1,12 +1,15 @@
-package com.sscanner.team.board.responsedto;
+package com.sscanner.team.board.responsedto
 
-import com.sscanner.team.board.entity.BoardImg;
+import com.sscanner.team.board.entity.BoardImg
 
-public record BoardImgResponseDTO(
-        String boardImgUrl
+data class BoardImgResponseDTO(
+    val boardImgUrl: String
 ) {
-    public static BoardImgResponseDTO from(BoardImg boardImg) {
-        return new BoardImgResponseDTO(
-                boardImg.getBoardImgUrl());
+    companion object {
+        fun from(boardImg: BoardImg): BoardImgResponseDTO {
+            return BoardImgResponseDTO(
+                boardImg.boardImgUrl
+            )
+        }
     }
 }

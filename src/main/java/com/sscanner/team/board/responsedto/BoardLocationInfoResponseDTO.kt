@@ -1,26 +1,28 @@
-package com.sscanner.team.board.responsedto;
+package com.sscanner.team.board.responsedto
 
-import com.sscanner.team.board.entity.Board;
-import com.sscanner.team.trashcan.type.TrashCategory;
+import com.sscanner.team.board.entity.Board
+import com.sscanner.team.trashcan.type.TrashCategory
+import java.math.BigDecimal
 
-import java.math.BigDecimal;
-
-public record BoardLocationInfoResponseDTO(
-        Long id,
-        TrashCategory trashCategory,
-        BigDecimal latitude,
-        BigDecimal longitude,
-        String roadNameAddress,
-        String detailedAddress
+data class BoardLocationInfoResponseDTO(
+    val id: Long?,
+    val trashCategory: TrashCategory,
+    val latitude: BigDecimal,
+    val longitude: BigDecimal,
+    val roadNameAddress: String,
+    val detailedAddress: String
 ) {
-    public static BoardLocationInfoResponseDTO from(Board board) {
-        return new BoardLocationInfoResponseDTO(
-                board.getId(),
-                board.getTrashCategory(),
-                board.getLatitude(),
-                board.getLongitude(),
-                board.getRoadNameAddress(),
-                board.getDetailedAddress()
-        );
+
+    companion object {
+        fun from(board: Board): BoardLocationInfoResponseDTO {
+            return BoardLocationInfoResponseDTO(
+                board.id,
+                board.trashCategory,
+                board.latitude,
+                board.longitude,
+                board.roadNameAddress,
+                board.detailedAddress
+            )
+        }
     }
 }

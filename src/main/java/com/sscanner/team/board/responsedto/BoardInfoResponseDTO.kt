@@ -1,19 +1,22 @@
-package com.sscanner.team.board.responsedto;
+package com.sscanner.team.board.responsedto
 
-import com.sscanner.team.board.entity.Board;
+import com.sscanner.team.board.entity.Board
 
-public record BoardInfoResponseDTO(
-        Long id,
-        String boardFirstImgUrl,
-        String roadNameAddress,
-        String detailedAddress
+data class BoardInfoResponseDTO(
+    val id: Long?,
+    val boardFirstImgUrl: String,
+    val roadNameAddress: String,
+    val detailedAddress: String
 ) {
-    public static BoardInfoResponseDTO of(Board board, String boardFirstImgUrl) {
-        return new BoardInfoResponseDTO(
-                board.getId(),
+
+    companion object {
+        fun of(board: Board, boardFirstImgUrl: String): BoardInfoResponseDTO {
+            return BoardInfoResponseDTO(
+                board.id,
                 boardFirstImgUrl,
-                board.getRoadNameAddress(),
-                board.getDetailedAddress()
-        );
+                board.roadNameAddress,
+                board.detailedAddress
+            )
+        }
     }
 }
