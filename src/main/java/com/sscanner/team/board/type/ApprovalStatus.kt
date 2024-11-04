@@ -1,6 +1,6 @@
-package com.sscanner.team.board.type;
+package com.sscanner.team.board.type
 
-public enum ApprovalStatus {
+enum class ApprovalStatus {
     REVIEWING,
     APPROVED,
     REJECTED

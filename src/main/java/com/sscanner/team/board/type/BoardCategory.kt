@@ -1,6 +1,6 @@
-package com.sscanner.team.board.type;
+package com.sscanner.team.board.type
 
-public enum BoardCategory {
+enum class BoardCategory {
     ADD,
     MODIFY,
     REMOVE
