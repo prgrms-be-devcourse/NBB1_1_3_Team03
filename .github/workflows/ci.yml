@@ -15,9 +15,9 @@ jobs:
     runs-on: ubuntu-latest
     env:
       # 임시 데이터베이스 환경변수(추후 RDS로 전환할 예정)
-      HOME_URL: ${{ secrets.HOME_URL }}
-      HOME_USERNAME: ${{ secrets.HOME_USERNAME }}
-      HOME_PASSWORD: ${{ secrets.HOME_PASSWORD }}
+      RDS_URL: ${{ secrets.RDS_URL }}
+      RDS_USERNAME: ${{ secrets.RDS_USERNAME }}
+      RDS_PASSWORD: ${{ secrets.RDS_PASSWORD }}
       # AWS 환경변수
       AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -35,6 +35,7 @@ jobs:
       COOLSMS_API_SECRET: ${{ secrets.COOLSMS_API_SECRET }}
       COOLSMS_PHONE_NUMBER: ${{ secrets.COOLSMS_PHONE_NUMBER }}
       #ELK
+      ELASTIC_URI: ${{ secrets.ELASTIC_URI }}
       STACK_VERSION: ${{ secrets.STACK_VERSION }}
       ELASTIC_USERNAME: ${{ secrets.ELASTIC_USERNAME }}
       ELASTIC_PASSWORD: ${{ secrets.ELASTIC_PASSWORD }}
