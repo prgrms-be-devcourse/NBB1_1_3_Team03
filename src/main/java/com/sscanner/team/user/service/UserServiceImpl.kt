@@ -83,14 +83,14 @@ class UserServiceImpl(
 
     // 마이페이지 조회
     override fun getMypage(): ApiResponse<UserMypageResponseDto> {
-        val user = userUtils.getUser()
+        val user = userUtils.user
         val responseDto = UserMypageResponseDto.create(user)
         return ApiResponse.ok(responseDto, "마이페이지 조회")
     }
 
     // 비밀번호 확인 (현재 비밀번호 확인)
     override fun confirmPassword(password: String): Boolean {
-        val user = userUtils.getUser()
+        val user = userUtils.user
 
         if (!passwordEncoder.matches(password, user.password)) {
             throw BadRequestException(ExceptionCode.CURRENT_PASSWORD_NOT_MATCH)
@@ -101,7 +101,7 @@ class UserServiceImpl(
     // 핸드폰 번호 수정
     @Transactional
     override fun updatePhoneNumber(req: UserPhoneUpdateRequestDto): UserPhoneUpdateResponseDto {
-        val user = userUtils.getUser()
+        val user = userUtils.user
 
         if (user.isPhoneEqual(req.newPhone)) {
             throw BadRequestException(ExceptionCode.SAME_PHONE_NUMBER)
@@ -117,7 +117,7 @@ class UserServiceImpl(
     // 닉네임 수정
     @Transactional
     override fun updateNickname(newNickname: String): UserNicknameUpdateResponseDto {
-        val user = userUtils.getUser()
+        val user = userUtils.user
 
         if (!user.isNicknameEqual(newNickname)) {
             checkDuplicatedNickname(newNickname)
@@ -129,7 +129,7 @@ class UserServiceImpl(
     // 비밀번호 수정
     @Transactional
     override fun changePassword(requestDto: UserPasswordChangeRequestDto): String {
-        val user = userUtils.getUser()
+        val user = userUtils.user
 
         validatePasswordChange(requestDto, user)
 
@@ -142,7 +142,7 @@ class UserServiceImpl(
     // 회원 탈퇴
     @Transactional
     override fun deleteUser() {
-        val user = userUtils.getUser()
+        val user = userUtils.user
         userRepository.delete(user)
     }
 
