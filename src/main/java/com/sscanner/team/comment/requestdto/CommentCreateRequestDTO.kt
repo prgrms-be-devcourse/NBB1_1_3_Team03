@@ -1,22 +1,22 @@
-package com.sscanner.team.comment.requestdto;
+package com.sscanner.team.comment.requestdto
 
-import com.sscanner.team.user.entity.User;
-import com.sscanner.team.comment.entity.Comment;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import com.sscanner.team.comment.entity.Comment
+import com.sscanner.team.comment.entity.Comment.Companion.builder
+import com.sscanner.team.user.entity.User
+import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.NotNull
 
-public record CommentCreateRequestDTO(
-        @NotNull(message = "boardId 작성은 필수입니다.")
-        Long boardId,
+@JvmRecord
+data class CommentCreateRequestDTO(
+    @JvmField val boardId: @NotNull(message = "boardId 작성은 필수입니다.") Long?,
 
-        @NotBlank(message = "내용 작성은 필수입니다.")
-        String content
+    val content: @NotBlank(message = "내용 작성은 필수입니다.") String?
 ) {
-    public Comment toEntityComment(User user) {
-        return Comment.builder()
-                .boardId(boardId)
-                .user(user)
-                .content(content)
-                .build();
+    fun toEntityComment(user: User?): Comment {
+        return builder()
+            .boardId(boardId)
+            .user(user)
+            .content(content)
+            .build()
     }
 }

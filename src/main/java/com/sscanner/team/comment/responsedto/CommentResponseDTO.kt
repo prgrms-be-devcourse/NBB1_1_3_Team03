@@ -1,20 +1,23 @@
-package com.sscanner.team.comment.responsedto;
+package com.sscanner.team.comment.responsedto
 
-import com.sscanner.team.user.entity.User;
-import com.sscanner.team.comment.entity.Comment;
+import com.sscanner.team.comment.entity.Comment
 
-public record CommentResponseDTO(
-        Long id,
-        String nickname,
-        String authority,
-        String content
+@JvmRecord
+data class CommentResponseDTO(
+    val id: Long?,
+    val nickname: String,
+    val authority: String,
+    val content: String?
 ) {
-    public static CommentResponseDTO from(Comment comment) {
-        return new CommentResponseDTO(
-                comment.getId(),
-                comment.getUser().getNickname(),
-                comment.getUser().getAuthority(),
-                comment.getContent()
-        );
+    companion object {
+        @JvmStatic
+        fun from(comment: Comment): CommentResponseDTO {
+            return CommentResponseDTO(
+                comment.id,
+                comment.user!!.nickname,
+                comment.user!!.authority,
+                comment.content
+            )
+        }
     }
 }
