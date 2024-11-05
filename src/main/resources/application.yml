@@ -1,9 +1,9 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: ${HOME_URL}
-    username: ${HOME_USERNAME}
-    password: ${HOME_PASSWORD}
+    url: ${RDS_URL}
+    username: ${RDS_URL}
+    password: ${RDS_PASSWORD}
 
   jpa:
     hibernate:
