@@ -23,7 +23,7 @@ class CommentController(
     fun deleteComment(@PathVariable commmentId: Long): ApiResponse<Any> {
         commentService.deleteComment(commmentId)
 
-        return ApiResponse.ok(200, null, "댓글 삭제 완료!!")
+        return ApiResponse.ok(200, "댓글 삭제 완료!!")
     }
 
     @GetMapping("/{boardId}")
@@ -34,9 +34,9 @@ class CommentController(
     }
 
     @DeleteMapping("/all/{boardId}")
-    fun deleteAllComments(@PathVariable boardId: Long): ApiResponse<Void> {
+    fun deleteAllComments(@PathVariable boardId: Long): ApiResponse<Any> {
         commentService.deleteAll(boardId)
 
-        return ApiResponse.ok(200, null, "모든 댓글 삭제 완료!!")
+        return ApiResponse.ok(200, "모든 댓글 삭제 완료!!")
     }
 }

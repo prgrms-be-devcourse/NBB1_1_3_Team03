@@ -7,9 +7,9 @@ services:
     ports:
       - "8082:8080"
     environment:
-      - HOME_URL
-      - HOME_USERNAME
-      - HOME_PASSWORD
+      - RDS_URL
+      - RDS_USERNAME
+      - RDS_PASSWORD
       - AWS_ACCESS_KEY
       - AWS_SECRET_KEY
       - AWS_REGION
@@ -22,8 +22,10 @@ services:
       - COOLSMS_API_KEY
       - COOLSMS_API_SECRET
       - COOLSMS_PHONE_NUMBER
+      - ELASTIC_URI
       - STACK_VERSION
       - ELASTIC_USERNAME
       - ELASTIC_PASSWORD
       - KIBANA_PASSWORD
       - CLUSTER_NAME
+      - OPENAI_API_KEY

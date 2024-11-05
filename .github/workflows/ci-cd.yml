@@ -10,9 +10,9 @@ jobs:
     runs-on: ubuntu-latest
     env:
       # 임시 데이터베이스 환경변수(추후 RDS로 전환할 예정)
-      HOME_URL: ${{ secrets.HOME_URL }}
-      HOME_USERNAME: ${{ secrets.HOME_USERNAME }}
-      HOME_PASSWORD: ${{ secrets.HOME_PASSWORD }}
+      RDS_URL: ${{ secrets.RDS_URL }}
+      RDS_USERNAME: ${{ secrets.RDS_USERNAME }}
+      RDS_PASSWORD: ${{ secrets.RDS_PASSWORD }}
       # AWS 환경변수
       AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -30,11 +30,14 @@ jobs:
       COOLSMS_API_SECRET: ${{ secrets.COOLSMS_API_SECRET }}
       COOLSMS_PHONE_NUMBER: ${{ secrets.COOLSMS_PHONE_NUMBER }}
       #ELK
+      ELASTIC_URI: ${{ secrets.ELASTIC_URI }}
       STACK_VERSION: ${{ secrets.STACK_VERSION }}
       ELASTIC_USERNAME: ${{ secrets.ELASTIC_USERNAME }}
       ELASTIC_PASSWORD: ${{ secrets.ELASTIC_PASSWORD }}
       KIBANA_PASSWORD: ${{ secrets.KIBANA_PASSWORD }}
       CLUSTER_NAME: ${{ secrets.CLUSTER_NAME }}
+      # GPT
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
     steps:
       - name: Github Repository 파일 불러오기
@@ -66,7 +69,7 @@ jobs:
         shell: bash
 
       - name: 빌드 및 테스트
-        run: ./gradlew build
+        run: ./gradlew build --stacktrace
       - name: AWS Resource에 접근할 수 있게 AWS credentials 설정
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -89,9 +92,9 @@ jobs:
 
       - name: .env 파일 작성
         run: |
-          echo "HOME_URL=${{ secrets.HOME_URL }}" >> docker-compose/.env
-          echo "HOME_USERNAME=${{ secrets.HOME_USERNAME }}" >> docker-compose/.env
-          echo "HOME_PASSWORD=${{ secrets.HOME_PASSWORD }}" >> docker-compose/.env
+          echo "RDS_URL=${{ secrets.RDS_URL }}" >> docker-compose/.env
+          echo "RDS_USERNAME=${{ secrets.RDS_USERNAME }}" >> docker-compose/.env
+          echo "RDS_PASSWORD=${{ secrets.RDS_PASSWORD }}" >> docker-compose/.env
           echo "AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }}" >> docker-compose/.env
           echo "AWS_SECRET_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> docker-compose/.env
           echo "AWS_REGION=ap-northeast-2" >> docker-compose/.env
@@ -104,12 +107,14 @@ jobs:
           echo "COOLSMS_API_KEY=${{ secrets.COOLSMS_API_KEY }}" >> docker-compose/.env
           echo "COOLSMS_API_SECRET=${{ secrets.COOLSMS_API_SECRET }}" >> docker-compose/.env
           echo "COOLSMS_PHONE_NUMBER=${{ secrets.COOLSMS_PHONE_NUMBER }}" >> docker-compose/.env
+          echo "ELASTIC_URI=${{ secrets.ELASTIC_URI }}" >> docker-compose/.env
           echo "STACK_VERSION=${{ secrets.STACK_VERSION }}" >> docker-compose/.env
           echo "ELASTIC_USERNAME=${{ secrets.ELASTIC_USERNAME }}" >> docker-compose/.env
           echo "ELASTIC_PASSWORD=${{ secrets.ELASTIC_PASSWORD }}" >> docker-compose/.env
           echo "KIBANA_PASSWORD=${{ secrets.KIBANA_PASSWORD }}" >> docker-compose/.env
           echo "CLUSTER_NAME=${{ secrets.CLUSTER_NAME }}" >> docker-compose/.env
-          
+          echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> docker-compose/.env
+
 
       - name: 압축하기
         run: tar -czvf $GITHUB_SHA.tar.gz appspec.yml scripts docker-compose

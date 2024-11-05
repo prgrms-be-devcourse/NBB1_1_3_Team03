@@ -1,9 +1,9 @@
 package com.sscanner.team.global.configure
 
+import com.sscanner.team.auth.jwt.LoginFilter
 import com.sscanner.team.auth.jwt.CustomLogoutFilter
 import com.sscanner.team.auth.jwt.JWTFilter
 import com.sscanner.team.auth.jwt.JWTUtil
-import com.sscanner.team.auth.jwt.LoginFilter
 import com.sscanner.team.auth.repository.RedisRefreshTokenRepository
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -32,31 +32,23 @@ class SecurityConfig(
     fun passwordEncoder(): BCryptPasswordEncoder = BCryptPasswordEncoder()
 
     @Bean
-    @Throws(Exception::class)
-    fun authenticationManager(config: AuthenticationConfiguration): AuthenticationManager {
-        return config.authenticationManager
-    }
+    fun authenticationManager(config: AuthenticationConfiguration): AuthenticationManager =
+        config.authenticationManager
 
     @Bean
-    @Throws(Exception::class)
     fun filterChain(http: HttpSecurity): SecurityFilterChain {
-        http
-            .csrf { it.disable() }
+        http.csrf { it.disable() }
             .formLogin { it.disable() }
             .httpBasic { it.disable() }
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .authorizeHttpRequests {
-                it.requestMatchers(
-                    "/login", "/", "health", "api/users/join", "/sms/**",
-                    "/api/users/reset-password", "/api/users/find-id", "/reissue", "/actuator/**"
-                ).permitAll()
+                it.requestMatchers("/login", "/", "health", "api/users/join", "/sms/**", "/api/users/reset-password", "/api/users/find-id", "/reissue", "/actuator/**")
+                    .permitAll()
                     .requestMatchers("/api/admin/boards/**").hasAuthority("ADMIN")
                     .anyRequest().authenticated()
             }
-            .cors { it.configurationSource(corsConfigurationSource()) }
 
         configureFilters(http)
-
         return http.build()
     }
 
@@ -64,9 +56,8 @@ class SecurityConfig(
     fun corsConfigurationSource(): CorsConfigurationSource {
         val configuration = CorsConfiguration()
         configuration.allowedOriginPatterns = listOf("http://localhost:*", "http://10.0.2.2:*")
-        configuration.allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "PATCH")
+        configuration.allowedMethods = listOf("GET", "POST", "PUT", "DELETE")
         configuration.allowedHeaders = listOf("*")
-        configuration.exposedHeaders = listOf("Authorization", "access")
         configuration.allowCredentials = true
 
         val source = UrlBasedCorsConfigurationSource()
@@ -74,7 +65,6 @@ class SecurityConfig(
         return source
     }
 
-    @Throws(Exception::class)
     private fun configureFilters(http: HttpSecurity) {
         val jwtFilter = JWTFilter(jwtUtil)
         val loginFilter = LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, refreshRepository)

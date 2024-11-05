@@ -63,7 +63,7 @@ class TrashcanApiController(private val trashcanService: TrashcanService) {
     }
 
     @DeleteMapping("/{trashcanId}")
-    fun deleteTrashcanInfo(@PathVariable trashcanId: Long?): ApiResponse<*> {
+    fun deleteTrashcanInfo(@PathVariable trashcanId: Long?): ApiResponse<Void> {
         trashcanService.deleteTrashcanInfo(trashcanId)
         return ApiResponse.ok(200, "쓰레기통 정보 삭제 성공")
     }

@@ -1,9 +1,9 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: ${HOME_URL}
-    username: ${HOME_USERNAME}
-    password: ${HOME_PASSWORD}
+    url: ${RDS_URL}
+    username: ${RDS_USERNAME}
+    password: ${RDS_PASSWORD}
 
   jpa:
     hibernate:
@@ -63,3 +63,13 @@ coolsms:
     number: "${COOLSMS_PHONE_NUMBER}"
 
 
+# 프로메테우스
+management:
+  endpoints:
+    web:
+      exposure:
+        include: prometheus
+  prometheus:
+    metrics:
+      export:
+        enabled: true
