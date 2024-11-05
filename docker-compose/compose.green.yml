@@ -28,3 +28,4 @@ services:
       - ELASTIC_PASSWORD
       - KIBANA_PASSWORD
       - CLUSTER_NAME
+      - OPENAI_API_KEY

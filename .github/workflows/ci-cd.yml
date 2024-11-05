@@ -36,6 +36,8 @@ jobs:
       ELASTIC_PASSWORD: ${{ secrets.ELASTIC_PASSWORD }}
       KIBANA_PASSWORD: ${{ secrets.KIBANA_PASSWORD }}
       CLUSTER_NAME: ${{ secrets.CLUSTER_NAME }}
+      # GPT
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
     steps:
       - name: Github Repository 파일 불러오기
@@ -111,6 +113,7 @@ jobs:
           echo "ELASTIC_PASSWORD=${{ secrets.ELASTIC_PASSWORD }}" >> docker-compose/.env
           echo "KIBANA_PASSWORD=${{ secrets.KIBANA_PASSWORD }}" >> docker-compose/.env
           echo "CLUSTER_NAME=${{ secrets.CLUSTER_NAME }}" >> docker-compose/.env
+          echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> docker-compose/.env
 
 
       - name: 압축하기
