@@ -83,7 +83,7 @@ jobs:
         shell: bash
 
       - name: 빌드 및 테스트
-        run: ./gradlew build
+        run: ./gradlew build --stacktrace
 
       - name: Sonarqube 분석
         env:
