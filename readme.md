@@ -200,8 +200,37 @@ SCANNER는 사용자에게 일반 쓰레기통 및 담배꽁초 전용 쓰레기
 <div align="center"><img align="center" width="900" alt="Wireframe" src="https://github.com/user-attachments/assets/64a4286b-d7aa-4c33-88cc-ab0e3d0b2dec"></div>
 
 ---
+<br>
 
-## 7. 개발자들
+## 7. 코틀린 마이그레이션 중 이슈
+### 🚨 널 안전성 문제
+- 코틀린은 변수에 널 값을 허용x  ➡ 프로퍼티 초기화 /생성자 주입  
+
+### 🚨생성자 주입 방식
+- 코틀린은 주로 @Autowired 대신 생성자 주입을 사용  val을 사용해 주입 가능 
+
+### 🚨Configuration과 Bean 선언
+- @Configuration @Bean 선언 시  fun 사용
+ ➡ 코틀린  타입 추론이 제대로 작동하지 않는 경우 반환 타입을 명시적 선언
+
+### 🚨Builder 대체 수단 필요
+- apply , copy 메서드, 정적 메서드 등을 활용해 구현
+
+### 🚨JPA  코틀린 data class 호환
+- data class 는 JPA 엔티티로 적합 x   ➡ 일반 클래스 사용
+- @Entity에는 기본생성자,  open 키워드 사용 -> gradle open 옵션 자동 기능 설정
+
+### 🚨Lombok 코틀린 사이 호환 문제
+- 롬복 사용 제한  ➡ 자체 지원되는 data class , val, var 키워드 통해 롬복 사용 최소화(제거)
+
+### 🚨 Checked Exception 처리
+- 코틀린은 Checked Exception을 강제 x  ➡ 예외 처리가 누락되지 않도록 주의  
+
+--- 
+
+<br>
+
+## 8. 개발자들
 <table>
 
   <td align=center>
